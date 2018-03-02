@@ -1,11 +1,14 @@
 %2dsegalazyer
 clearvars;
 close all;
+file2.slashtype = '/';
+codedir = cd;
+cleandirname = strfind(codedir, file2.slashtype);
+file2.codeparent = codedir(1:cleandirname(end))
 
-addpath('/Users/draina/Documents/MATLAB/dr_progs/MPI_Progs/ExchangeTools/raacampbell-notBoxPlot-2fbf98c/code');
-addpath('/Users/draina/Documents/MATLAB/dr_progs/MPI_Progs/ExchangeTools/DrosteEffect-BrewerMap-a77e675')
-addpath('/Users/draina/Documents/MATLAB/dr_progs/MPI_Progs/IFAnalysis');
-
+addpath([file2.codeparent 'ExchangeTools' file2.slashtype 'plot3k']);
+addpath([file2.codeparent 'ExchangeTools' file2.slashtype 'DrosteEffect-BrewerMap-a77e675'])
+addpath([file2.codeparent 'ExchangeTools' file2.slashtype 'raacampbell-notBoxPlot-2fbf98c' file2.slashtype 'code']);
 slashtype = '/';
 
 
@@ -24,15 +27,15 @@ pathlist = {
 %     '/Users/draina/Desktop/2017_E2_2_June_ReleaseKinetics/ESL'
 %     '/Users/draina/Desktop/2017_E2_2_June_ReleaseKinetics/PDO3'
     
-    '/Users/draina/Desktop/Otx2_3/Nuclear/KO_2i'
- %  '/Users/draina/Desktop/Otx2_3/Nuclear/WT_2i'
-    '/Users/draina/Desktop/Otx2_3/Nuclear/KO_ESL'
+ %'/Users/draina/Desktop/Otx2_3/Nuclear/KO_2i'
+   '/Users/draina/Desktop/Otx2_3/Nuclear/WT_2i'
+ % '/Users/draina/Desktop/Otx2_3/Nuclear/KO_ESL'
  % '/Users/draina/Desktop/Otx2_3/Nuclear/WT_ESL'
-    '/Users/draina/Desktop/Otx2_3/Nuclear/KO_N2C_12'
- %'/Users/draina/Desktop/Otx2_3/Nuclear/WT_N2C_12'
-    '/Users/draina/Desktop/Otx2_3/Nuclear/KO_N2C_24'
- %'/Users/draina/Desktop/Otx2_3/Nuclear/WT_N2C_24'
-    
+ % '/Users/draina/Desktop/Otx2_3/Nuclear/KO_N2C_12'
+   '/Users/draina/Desktop/Otx2_3/Nuclear/WT_N2C_12'
+ '/Users/draina/Desktop/Otx2_3/Nuclear/WT_N2C_24'
+        '/Users/draina/Desktop/Otx2_3/Nuclear/KO_N2C_24'
+
     
     
     };
@@ -51,14 +54,14 @@ pathlist_labels = {
 %     'PDO3'
     %'ESL'
     
-    'KO_2i'
-%    'WT_2i'
-    'KO_ESL'
+%    'KO_2i'
+    'WT_2i'
+%    'KO_ESL'
 %    'WT_ESL'
-    'KO_N2C_12'
-%    'WT_N2C_12'
+%    'KO_N2C_12'
+    'WT_N2C_12'
+    'WT_N2C_24'
     'KO_N2C_24'
-%    'WT_N2C_24'
     };
 
 
@@ -376,7 +379,7 @@ end
 if conscat ==1
     %% Consolidated Scatter:
     clear chlabel
-    TreatmentList = [1 2];
+    TreatmentList = [1 2 3 4];
     xchan = 2;
     ychan = 3;
     %calcType : 1-Nuc, 2-Cyt, 3-WholeCell, 4-N/C Ratio
