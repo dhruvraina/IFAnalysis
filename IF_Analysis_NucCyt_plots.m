@@ -2,10 +2,10 @@
 clearvars;
 close all;
 file2.slashtype = '/';
+file2.savename = 'otxrep';
 codedir = cd;
 cleandirname = strfind(codedir, file2.slashtype);
 file2.codeparent = codedir(1:cleandirname(end))
-
 addpath([file2.codeparent 'ExchangeTools' file2.slashtype 'plot3k']);
 addpath([file2.codeparent 'ExchangeTools' file2.slashtype 'DrosteEffect-BrewerMap-a77e675'])
 addpath([file2.codeparent 'ExchangeTools' file2.slashtype 'raacampbell-notBoxPlot-2fbf98c' file2.slashtype 'code']);
@@ -27,17 +27,28 @@ pathlist = {
 %     '/Users/draina/Desktop/2017_E2_2_June_ReleaseKinetics/ESL'
 %     '/Users/draina/Desktop/2017_E2_2_June_ReleaseKinetics/PDO3'
     
- %'/Users/draina/Desktop/Otx2_3/Nuclear/KO_2i'
-   '/Users/draina/Desktop/Otx2_3/Nuclear/WT_2i'
- % '/Users/draina/Desktop/Otx2_3/Nuclear/KO_ESL'
- % '/Users/draina/Desktop/Otx2_3/Nuclear/WT_ESL'
- % '/Users/draina/Desktop/Otx2_3/Nuclear/KO_N2C_12'
-   '/Users/draina/Desktop/Otx2_3/Nuclear/WT_N2C_12'
- '/Users/draina/Desktop/Otx2_3/Nuclear/WT_N2C_24'
-        '/Users/draina/Desktop/Otx2_3/Nuclear/KO_N2C_24'
+%  %'/Users/draina/Desktop/Otx2_3/Nuclear/KO_2i'
+%    '/Users/draina/Desktop/Otx2_3/Nuclear/WT_2i'
+%  % '/Users/draina/Desktop/Otx2_3/Nuclear/KO_ESL'
+%  % '/Users/draina/Desktop/Otx2_3/Nuclear/WT_ESL'
+%  % '/Users/draina/Desktop/Otx2_3/Nuclear/KO_N2C_12'
+%    '/Users/draina/Desktop/Otx2_3/Nuclear/WT_N2C_12'
+%  '/Users/draina/Desktop/Otx2_3/Nuclear/WT_N2C_24'
+%         '/Users/draina/Desktop/Otx2_3/Nuclear/KO_N2C_24'
 
-    
-    
+%     
+%    '/Users/draina/Desktop/2018_E1_3_otx2Fixed/Nuclear Intensities/KO_N2C_000'
+%    '/Users/draina/Desktop/2018_E1_3_otx2Fixed/Nuclear Intensities/KO_N2C_005'
+%    '/Users/draina/Desktop/2018_E1_3_otx2Fixed/Nuclear Intensities/KO_N2C_100'
+%    '/Users/draina/Desktop/2018_E1_3_otx2Fixed/Nuclear Intensities/WT_ESL'
+
+'/Users/draina/Desktop/2018_E2_OTX2_ReporterTest/Clone1_2i'  
+'/Users/draina/Desktop/2018_E2_OTX2_ReporterTest/Clone1_ESL'  
+'/Users/draina/Desktop/2018_E2_OTX2_ReporterTest/Clone1_N2Ch'  
+'/Users/draina/Desktop/2018_E2_OTX2_ReporterTest/Clone10_2i'  
+'/Users/draina/Desktop/2018_E2_OTX2_ReporterTest/Clone10_ESL'  
+'/Users/draina/Desktop/2018_E2_OTX2_ReporterTest/Clone10_N2Ch' 
+
     };
 
 pathlist_labels = {
@@ -54,15 +65,27 @@ pathlist_labels = {
 %     'PDO3'
     %'ESL'
     
-%    'KO_2i'
-    'WT_2i'
-%    'KO_ESL'
-%    'WT_ESL'
-%    'KO_N2C_12'
-    'WT_N2C_12'
-    'WT_N2C_24'
-    'KO_N2C_24'
-    };
+% %    'KO_2i'
+%     'WT_2i'
+% %    'KO_ESL'
+% %    'WT_ESL'
+% %    'KO_N2C_12'
+%     'WT_N2C_12'
+%     'WT_N2C_24'
+%     'KO_N2C_24'
+
+% 'KO 0ng'
+% 'KO 5ng'
+% 'KO 100ng'
+% 'WT ESL'
+
+ 'Clone1 2i'
+ 'Clone1 ESL'
+ 'Clone1 N2Ch'
+ 'Clone10 2i'
+ 'Clone10 ESL'
+ 'Clone10 N2Ch'
+ };
 
 
 %Order Channel Labels according to image
@@ -72,17 +95,26 @@ ChannelLabel = {
     %         'SPRY4'
     %         'OCT3/4'
     
-    'DAPI'
-    'Otx2'
-    'Trans'
-    'Nanog'
-    %
+%     'DAPI'
+%     'Otx2'
+%     'Trans'
+%     'Nanog'
+%     %
     %     'DAPI'
     %     'Trans'
     %     'Sensor'
     %     'ppErk'
     %
     
+%     'Nanog'
+%     'Crap'
+%     'Crap'
+%     'OTX2'
+    
+'DAPI'
+'tRFP'
+'Trans'
+'OTX2'
     };
 
 ChannelCalcs = {                        %1 - Nuc, 2-Cyt, 3- Whole Cell, 4 - Nuc/Cyt ratio
@@ -101,7 +133,7 @@ calclbl = {
     
     };
 
-boxplot = 0                                                            
+boxplot = 1                                                            
 conscat = 1
 chanscat = 1
 
@@ -109,11 +141,12 @@ chanscat = 1
 % Reorder Channels according to how you want to plot them (expects 4
 % channels, so just duplicate or set one to garbage channel). Also expects
 % Ch1 to be DAPI - doesn't quantify this channel!
-ReorderChan = [ 1; 2; 4; 3];
+ReorderChan = [1; 2; 4; 3];
+%ReorderChan = [ 3; 1; 4; 2];
 %ReorderChan = [ 3; 2; 1; 4 ];
 %ReorderChan = [ 1; 3; 4; 2 ];
 
-inputTableType = 'csv';
+%inputTableType = 'csv';
 plotxlabel = [ChannelLabel(ReorderChan)];
 
 for qq = 1:length(ReorderChan)
@@ -172,7 +205,7 @@ for ctr2 = 1:length(pathlist)
                 intDenWhole_ch2{cnt1} = zeros(size(areaNuc_ch2{cnt1}));
                 intDenWhole_ch3{cnt1} = zeros(size(areaNuc_ch2{cnt1}));
                 intDenWhole_ch4{cnt1} = zeros(size(areaNuc_ch2{cnt1}));
-                areaWhole_ch2{cnt1} = zeros(size(areaNuc_ch2{cnt1}));
+                areaWhole_ch2{cnt1}   = zeros(size(areaNuc_ch2{cnt1}));
                 areaWhole_ch3{cnt1}   = zeros(size(areaNuc_ch2{cnt1}));
                 areaWhole_ch4{cnt1}   = zeros(size(areaNuc_ch2{cnt1}));
                 
@@ -307,7 +340,7 @@ if boxplot==1
     
     %% Per-Channel Box Plots (i.e. across all treatment groups for one channel)
     activeChans = cellfun(@(x) sum(x),ChannelCalcsR)>0; %Reads the ChannelCalcs variable to decide which channels need calcs
-    plotflag = [1 0 0];
+    plotflag.type = 'boxplot'
     scatx = 0;
     scaty = 0;
     for rr = 1:length(activeChans) %Channels
@@ -327,7 +360,7 @@ if boxplot==1
                     
                     chlabel = ChannelLabel(ReorderChan(rr));
                     calclbl2 = char(calclbl{calcType});
-                    IF_ncplot(plotflag, resvec,scatx, scaty, pathlist_labels, chlabel, calclbl2, file, slashtype)
+                    IF_ncplot(plotflag, resvec,scatx, scaty, pathlist_labels, chlabel, calclbl2, file, file2, slashtype)
                 end
             end
         end
@@ -338,19 +371,23 @@ if chanscat ==1
     
     %% Per Channel Scatter
     clear chlabel
-    xchan = 2;
-    ychan = 3;
+    xchan = 3;
+    ychan = 2;
+    lims.x = [2 40];
+    lims.y = [2 40];
     %calcType : 1-Nuc, 2-Cyt, 3-WholeCell, 4-N/C Ratio
     xcalcType = 1;
     ycalcType = 1;
     
-    plotflag = [0 1 0];
-    chlabel{1,1} = char(ChannelLabel(ReorderChan(xchan)));
+plotflag.type = 'SingleScatter';
+plotflag.corrprint = 1;
+
+chlabel{1,1} = char(ChannelLabel(ReorderChan(xchan)));
     chlabel{1,2} = char(ChannelLabel(ReorderChan(ychan)));
     
     chlabel{2,1} = char(calclbl{xcalcType});
     chlabel{2,2} = char(calclbl{ycalcType});
-    resvec = 0;
+   % resvec = 0;
     for nn = 1:length(file)
         switch xchan
             case(2)
@@ -369,8 +406,8 @@ if chanscat ==1
                 scaty = resvec_calc4{ycalcType,nn}(:,1);
         end
 
-        plotflag(2,1) = nn;
-        IF_ncplot(plotflag, resvec,scatx, scaty, char(pathlist_labels{nn}), chlabel, calclbl, file, slashtype)
+        plotflag.singTreat = nn;
+        IF_ncplot(plotflag, resvec,scatx, scaty, char(pathlist_labels{nn}), chlabel, calclbl, file, file2, slashtype, lims)
     end
     
 end
@@ -379,9 +416,9 @@ end
 if conscat ==1
     %% Consolidated Scatter:
     clear chlabel
-    TreatmentList = [1 2 3 4];
-    xchan = 2;
-    ychan = 3;
+    TreatmentList = [1 3];
+    xchan = 3;
+    ychan = 2;
     %calcType : 1-Nuc, 2-Cyt, 3-WholeCell, 4-N/C Ratio
     xcalcType = 1;
     ycalcType = 1;
