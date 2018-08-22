@@ -2,7 +2,7 @@
 clearvars;
 close all;
 file2.slashtype = '/';
-file2.savename = 'otxrep';
+file2.savename = 'E1_11';
 codedir = cd;
 cleandirname = strfind(codedir, file2.slashtype);
 file2.codeparent = codedir(1:cleandirname(end))
@@ -14,19 +14,30 @@ slashtype = '/';
 
 %% User Inputs:
 pathlist = {
+    
+
+'/Users/draina/Desktop/2018_E7_13_N2Ch/an_CNP7_ESL'
+'/Users/draina/Desktop/2018_E7_13_N2Ch/an_CNP7_N2Ch_24'
+'/Users/draina/Desktop/2018_E7_13_N2Ch/an_CNP11_ESL'
+'/Users/draina/Desktop/2018_E7_13_N2Ch/an_CNP11_N2Ch_24'
+'/Users/draina/Desktop/2018_E7_13_N2Ch/an_E14_N2Ch_24'
+'/Users/draina/Desktop/2018_E7_13_N2Ch/an_H2BV_ESL'
+'/Users/draina/Desktop/2018_E7_13_N2Ch/an_H2BV_N2Ch_24'
+'/Users/draina/Desktop/2018_E7_13_N2Ch/an_Tg4mCh_N2Ch_24'
+
+
     % '/Users/draina/Desktop/2017_eKTR_ERK_Analysis/PDO3_Release'
     % '/Users/draina/Desktop/2017_eKTR_ERK_Analysis/PDO3'
     % '/Users/draina/Desktop/2017_eKTR_ERK_Analysis/ESL'
     
-%     '/Users/draina/Desktop/2017_E2_2_June_ReleaseKinetics/1minRelease'
-%     '/Users/draina/Desktop/2017_E2_2_June_ReleaseKinetics/2minRelease'
-%     '/Users/draina/Desktop/2017_E2_2_June_ReleaseKinetics/3_5minRelease'
-%     '/Users/draina/Desktop/2017_E2_2_June_ReleaseKinetics/7_5minRelease'
-%     '/Users/draina/Desktop/2017_E2_2_June_ReleaseKinetics/15minRelease'
-%     '/Users/draina/Desktop/2017_E2_2_June_ReleaseKinetics/30minRelease'
-%     '/Users/draina/Desktop/2017_E2_2_June_ReleaseKinetics/ESL'
-%     '/Users/draina/Desktop/2017_E2_2_June_ReleaseKinetics/PDO3'
-    
+% '/Users/draina/Desktop/2018_E1_11_FixedOnly/an_2i'
+% '/Users/draina/Desktop/2018_E1_11_FixedOnly/an_ESL'
+% '/Users/draina/Desktop/2018_E1_11_FixedOnly/an_N2Ch_12h'
+% '/Users/draina/Desktop/2018_E1_11_FixedOnly/an_N2Ch_12h_F420'
+% '/Users/draina/Desktop/2018_E1_11_FixedOnly/an_N2Ch_24h'
+% '/Users/draina/Desktop/2018_E1_11_FixedOnly/an_N2Ch_24h_F420'
+% '/Users/draina/Desktop/2018_E1_11_FixedOnly/an_N2Ch_LIF'
+
 %  %'/Users/draina/Desktop/Otx2_3/Nuclear/KO_2i'
 %    '/Users/draina/Desktop/Otx2_3/Nuclear/WT_2i'
 %  % '/Users/draina/Desktop/Otx2_3/Nuclear/KO_ESL'
@@ -42,12 +53,12 @@ pathlist = {
 %    '/Users/draina/Desktop/2018_E1_3_otx2Fixed/Nuclear Intensities/KO_N2C_100'
 %    '/Users/draina/Desktop/2018_E1_3_otx2Fixed/Nuclear Intensities/WT_ESL'
 
-'/Users/draina/Desktop/2018_E2_OTX2_ReporterTest/Clone1_2i'  
-'/Users/draina/Desktop/2018_E2_OTX2_ReporterTest/Clone1_ESL'  
-'/Users/draina/Desktop/2018_E2_OTX2_ReporterTest/Clone1_N2Ch'  
-'/Users/draina/Desktop/2018_E2_OTX2_ReporterTest/Clone10_2i'  
-'/Users/draina/Desktop/2018_E2_OTX2_ReporterTest/Clone10_ESL'  
-'/Users/draina/Desktop/2018_E2_OTX2_ReporterTest/Clone10_N2Ch' 
+% '/Users/draina/Desktop/2018_E2_OTX2_ReporterTest/Clone1_2i'  
+% '/Users/draina/Desktop/2018_E2_OTX2_ReporterTest/Clone1_ESL'  
+% '/Users/draina/Desktop/2018_E2_OTX2_ReporterTest/Clone1_N2Ch'  
+% '/Users/draina/Desktop/2018_E2_OTX2_ReporterTest/Clone10_2i'  
+% '/Users/draina/Desktop/2018_E2_OTX2_ReporterTest/Clone10_ESL'  
+% '/Users/draina/Desktop/2018_E2_OTX2_ReporterTest/Clone10_N2Ch' 
 
     };
 
@@ -55,14 +66,25 @@ pathlist_labels = {
     %     'PDO3 (min ERK)'
     %     'PDO3 Release (max ERK)'
     %     'ES+Lif'
-%     '1min'
-%     '2min'
-%     '3.5min'
-%     '7.5min'
-%     '15min'
-%     '30min'
+
+%     '2i'
 %     'ESL'
-%     'PDO3'
+%     'N2Ch 12h'
+%     'N2Ch 12h F4 20'
+%     'N2Ch 24h'
+%     'N2Ch 24h F4 20'
+%     'N2Ch LIF'
+    
+
+'CNP7esl'
+'CNP7n2'
+'CNP11esl'
+'CNP11n2'
+'E14'
+'H2BVesl'
+'H2BVn2'
+'Tg4mch'
+
     %'ESL'
     
 % %    'KO_2i'
@@ -79,12 +101,12 @@ pathlist_labels = {
 % 'KO 100ng'
 % 'WT ESL'
 
- 'Clone1 2i'
- 'Clone1 ESL'
- 'Clone1 N2Ch'
- 'Clone10 2i'
- 'Clone10 ESL'
- 'Clone10 N2Ch'
+%  'Clone1 2i'
+%  'Clone1 ESL'
+%  'Clone1 N2Ch'
+%  'Clone10 2i'
+%  'Clone10 ESL'
+%  'Clone10 N2Ch'
  };
 
 
@@ -95,10 +117,10 @@ ChannelLabel = {
     %         'SPRY4'
     %         'OCT3/4'
     
-%     'DAPI'
-%     'Otx2'
-%     'Trans'
-%     'Nanog'
+    'NANOG'
+    'DAPI'
+    'OTX2'
+    'Trans'
 %     %
     %     'DAPI'
     %     'Trans'
@@ -111,17 +133,17 @@ ChannelLabel = {
 %     'Crap'
 %     'OTX2'
     
-'DAPI'
-'tRFP'
-'Trans'
-'OTX2'
+% 'DAPI'
+% 'tRFP'
+% 'Trans'
+% 'OTX2'
     };
 
 ChannelCalcs = {                        %1 - Nuc, 2-Cyt, 3- Whole Cell, 4 - Nuc/Cyt ratio
-    [0,0,0,0]
     [1,0,0,0]
     [0,0,0,0]
     [1,0,0,0]
+    [0,0,0,0]
     };
 ff= cell2mat(ChannelCalcs);
 
@@ -141,9 +163,9 @@ chanscat = 1
 % Reorder Channels according to how you want to plot them (expects 4
 % channels, so just duplicate or set one to garbage channel). Also expects
 % Ch1 to be DAPI - doesn't quantify this channel!
-ReorderChan = [1; 2; 4; 3];
+%ReorderChan = [1; 2; 4; 3];
 %ReorderChan = [ 3; 1; 4; 2];
-%ReorderChan = [ 3; 2; 1; 4 ];
+ReorderChan = [ 2; 1; 3; 4];
 %ReorderChan = [ 1; 3; 4; 2 ];
 
 %inputTableType = 'csv';
@@ -172,6 +194,11 @@ for ctr2 = 1:length(pathlist)
     
     %Look for *.txt and .csv files
     dir_cell = [dir(fullfile(file(ctr2).path, '*.txt')); dir(fullfile(file(ctr2).path, '*.csv'))];
+    
+    %Error Handling:
+    if isempty(dir_cell)
+        errordlg('Check directory names, error in file struct')
+    end
     
     %readtable is faster than loaddata!
     cnt1 = 1;
@@ -373,8 +400,8 @@ if chanscat ==1
     clear chlabel
     xchan = 3;
     ychan = 2;
-    lims.x = [2 40];
-    lims.y = [2 40];
+    lims.x = [0 200];
+    lims.y = [0 50];
     %calcType : 1-Nuc, 2-Cyt, 3-WholeCell, 4-N/C Ratio
     xcalcType = 1;
     ycalcType = 1;
@@ -416,14 +443,17 @@ end
 if conscat ==1
     %% Consolidated Scatter:
     clear chlabel
-    TreatmentList = [1 3];
+    plotflag.type = 'ConScatter';
+    plotflag.conTreat = [1 2 3 4 5 6 7];
+    lims.x = [0 250];
+    lims.y = [0 250];
     xchan = 3;
     ychan = 2;
     %calcType : 1-Nuc, 2-Cyt, 3-WholeCell, 4-N/C Ratio
     xcalcType = 1;
     ycalcType = 1;
     
-    plotflag = [0 0 1];
+    
     chlabel{1} = [char(ChannelLabel(ReorderChan(xchan))) ' ' char(calclbl(xcalcType))];
     chlabel{2} = [char(ChannelLabel(ReorderChan(ychan))) ' ' char(calclbl(ycalcType))];
     resvec = 0;
@@ -444,8 +474,7 @@ if conscat ==1
         case(4)
             scaty = resvec_calc4(ycalcType,:);
     end
-    plotflag(3,1:length(TreatmentList)) = TreatmentList;
-    plotflag(2,1) = length(file); %For colours
+    plotflag.colours = 1:length(file); %For colours
     IF_ncplot(plotflag, resvec,scatx, scaty, pathlist_labels, chlabel, calclbl, file, slashtype)
     
     
