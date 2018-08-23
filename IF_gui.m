@@ -284,15 +284,14 @@ handles.file.experimentName = handles.file.path(namefinder(end)+1:end);
 
 %Loads in the metadata matfile here:
 metaname = dir(fullfile(handles.file.path, '*metadata.mat'));
-metafile = ([handles.file.path handles.file.slashtype metaname(1).name]);
-if exist(metafile, 'file')==2  
- button = questdlg(['Metadata file found! It''s name is: ' metaname(1).name '  Should I load these settings? '], 'Experiment Metadata Loader', 'Yes', 'No', 'Yes');
-end
-
-if strcmp(button, 'Yes')
-    handles_old = handles;
-    load(metafile)
-    handles.file = handles_old.file;
+if ~isempty(metaname)
+    metafile = ([handles.file.path handles.file.slashtype metaname(1).name]);
+    button = questdlg(['Metadata file found! It''s name is: ' metaname(1).name '  Should I load these settings? '], 'Experiment Metadata Loader', 'Yes', 'No', 'Yes');
+    
+    if strcmp(button, 'Yes')
+        handles_old = handles;
+        load(metafile)
+    end
 end
 guidata(hObject, handles);
 
