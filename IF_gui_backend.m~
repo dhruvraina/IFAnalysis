@@ -231,7 +231,7 @@ for ctr2 = 1:length(file.treatmentfold)
           intDenNuc_ch1  intDenNuc_ch2   intDenNuc_ch3   intDenNuc_ch4 ...
           areaNuc_ch1    areaNuc_ch2     areaNuc_ch3     areaNuc_ch4 ...
           intDenWhole_ch1 intDenWhole_ch2 intDenWhole_ch3 intDenWhole_ch4 ...
-          areaWhole_ch1  areaWhole_ch2   areaWhole_ch3    areaWhole_ch4
+          areaWhole_ch1   areaWhole_ch2   areaWhole_ch3    areaWhole_ch4
 end
 
 %% --------------  A. Boxplots  --------:
@@ -241,8 +241,8 @@ if outputs.boxplot==1
     if ~isempty(activeChans)
         
         %Inputs for IF_ncplot.m
-        plotflag.type = 'boxplot2'                                         %boxplot1 is the basic NotBoxPlot; 
-        scatx = 0;                                                         %boxplot2 is the UnivarScatter plot;
+        plotflag.type = 'boxplot2'                                         %boxplot1 is the basic NotBoxPlot
+        scatx = 0;
         scaty = 0;
         
         for cc = activeChans                                               %Channels - in columns
@@ -328,7 +328,7 @@ if outputs.chanscat ==1
 end
 
 %% --------------  C. Multiple Treatments In One Scatter  --------:
-if outputs.conscat==1
+if outputs.conscat ==1
     clear chlabel
     plotflag.type     = 'ConScatter';
     plotflag.conTreat = 1:length(file.treatmentLabels);                    %Replace this with the actual list of treatments
