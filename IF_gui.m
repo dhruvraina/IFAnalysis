@@ -571,23 +571,37 @@ handles.inputs.activeChans   = [get(handles.rdbt_calcCh1, 'Value') ...
     get(handles.rdbt_calcCh4, 'Value')];
 
 %Outputs
+
+%ImageFormat
 if get(handles.rdbt_png, 'Value')==1
     handles.outputs.imageFormat = 'png'
 elseif get(handles.rdbt_svg, 'Value')==1
     handles.outputs.imageFormat = 'svg'
 end
+
+%PlotMode
+if get(handles.rdbt_plotAll, 'Value')
+    handles.outputs.plotMode = 'all'
+elseif get(handles.rdbt_plotOnly, 'Value')
+    handles.outputs.plotMode = 'subset'
+    
+    %error handling
+    if strcmp(get(handles.etx_treatmentnums, 'String'), '...')
+        errordlg('No treatment numbers entered! ')
+    end
+    
+end
+
 handles.outputs.boxplot      = get(handles.rdbt_boxPlot, 'Value');
 handles.outputs.conscat      = get(handles.chk_consolidscat, 'Value');
 handles.outputs.chanscat     = get(handles.chk_singlescat,'Value');
-handles.outputs.plotall      = get(handles.rdbt_plotAll, 'Value');
-handles.outputs.limconscat   = get(handles.rdbt_plotOnly, 'Value');
-handles.outputs.limconscatID = get(handles.etx_treatmentnums, 'String');
+handles.outputs.limconscatID = str2num(get(handles.etx_treatmentnums, 'String')); %#ok<ST2NM>
 handles.outputs.scatX        = get(handles.pop_xScat,'Value' );
 handles.outputs.scatY        = get(handles.pop_yScat, 'Value');
 handles.outputs.scatXlim     = [str2double(get(handles.etx_xlimLow, 'String')) str2double(get(handles.etx_xlimHi, 'String'))];
 handles.outputs.scatYlim     = [str2double(get(handles.etx_ylimLow, 'String')) str2double(get(handles.etx_ylimHi, 'String'))];
 handles.outputs.CorrLine     = get(handles.chk_xCorr, 'Value');
-
+handles.outputs.margDist     = get(handles.chk_margDist, 'Value');
 
 %Calcs
 calclist(1:4) = 0;

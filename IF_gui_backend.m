@@ -1,6 +1,6 @@
 %IF Plotter
 %Description: Backend for IF_GUI. Plots .csv or .txt data by grouping
-%a table of values by the header 'Ch' into channels. 
+%a table of values by the header 'Ch' into channels.
 %Last Edit: 180822
 %Author: draina
 
@@ -13,6 +13,7 @@ ch2 = 2;
 ch3 = 3;
 ch4 = 4;
 plotflag.imageFormat = outputs.imageFormat;
+plotflag.margDist    = outputs.margDist;
 
 for ctr2 = 1:length(file.treatmentfold)
     
@@ -69,9 +70,9 @@ for ctr2 = 1:length(file.treatmentfold)
                 
                 %empty variables:
                 [intDenWhole_ch1{cnt1}, intDenWhole_ch2{cnt1}, ...
-                 intDenWhole_ch3{cnt1}, intDenWhole_ch4{cnt1}, ...
-                   areaWhole_ch1{cnt1},   areaWhole_ch2{cnt1}, ...
-                   areaWhole_ch3{cnt1},   areaWhole_ch4{cnt1}, ...
+                    intDenWhole_ch3{cnt1}, intDenWhole_ch4{cnt1}, ...
+                    areaWhole_ch1{cnt1},   areaWhole_ch2{cnt1}, ...
+                    areaWhole_ch3{cnt1},   areaWhole_ch4{cnt1}, ...
                     ] = deal(zeros(size(areaNuc_ch2{cnt1})));
                 
                 cnt1 = cnt1+1;
@@ -91,9 +92,9 @@ for ctr2 = 1:length(file.treatmentfold)
                 
                 %Empty Variables:
                 [intDenNuc_ch1{cnt2}, intDenNuc_ch2{cnt2}, ...
-                 intDenNuc_ch3{cnt2}, intDenNuc_ch4{cnt2}, ...
-                   areaNuc_ch1{cnt2},   areaNuc_ch2{cnt2}, ...
-                   areaNuc_ch3{cnt2},   areaNuc_ch4{cnt2}, ...
+                    intDenNuc_ch3{cnt2}, intDenNuc_ch4{cnt2}, ...
+                    areaNuc_ch1{cnt2},   areaNuc_ch2{cnt2}, ...
+                    areaNuc_ch3{cnt2},   areaNuc_ch4{cnt2}, ...
                     ] = deal([]);
                 
                 cnt2 = cnt2+1;
@@ -225,13 +226,13 @@ for ctr2 = 1:length(file.treatmentfold)
     
     %Clear Vars for loop:
     clear meanNuc_1      meanNuc_2       meanNuc_3       meanNuc_4 ...
-          meanCyt_1      meanCyt_2       meanCyt_3       meanCyt_4 ...
-          meanWhole_1    meanWhole_2     meanWhole_3     meanWhole_4 ...
-          meanRatio_1    meanRatio_2     meanRatio_3     meanRatio_4 temptable ...
-          intDenNuc_ch1  intDenNuc_ch2   intDenNuc_ch3   intDenNuc_ch4 ...
-          areaNuc_ch1    areaNuc_ch2     areaNuc_ch3     areaNuc_ch4 ...
-          intDenWhole_ch1 intDenWhole_ch2 intDenWhole_ch3 intDenWhole_ch4 ...
-          areaWhole_ch1  areaWhole_ch2   areaWhole_ch3    areaWhole_ch4
+        meanCyt_1      meanCyt_2       meanCyt_3       meanCyt_4 ...
+        meanWhole_1    meanWhole_2     meanWhole_3     meanWhole_4 ...
+        meanRatio_1    meanRatio_2     meanRatio_3     meanRatio_4 temptable ...
+        intDenNuc_ch1  intDenNuc_ch2   intDenNuc_ch3   intDenNuc_ch4 ...
+        areaNuc_ch1    areaNuc_ch2     areaNuc_ch3     areaNuc_ch4 ...
+        intDenWhole_ch1 intDenWhole_ch2 intDenWhole_ch3 intDenWhole_ch4 ...
+        areaWhole_ch1  areaWhole_ch2   areaWhole_ch3    areaWhole_ch4
 end
 
 %% --------------  A. Boxplots  --------:
@@ -241,7 +242,7 @@ if outputs.boxplot==1
     if ~isempty(activeChans)
         
         %Inputs for IF_ncplot.m
-        plotflag.type = 'boxplot2'                                         %boxplot1 is the basic NotBoxPlot; 
+        plotflag.type = 'boxplot2'                                         %boxplot1 is the basic NotBoxPlot;
         scatx = 0;                                                         %boxplot2 is the UnivarScatter plot;
         scaty = 0;
         
@@ -261,9 +262,21 @@ if outputs.boxplot==1
                             resvec = resvec_calc4(rr,:);
                     end
                     
+                    
+                    switch outputs.plotMode
+                        case 'subset'
+                            resvec = resvec(:,outputs.limconscatID);
+                            treatmentLabels = file.treatmentLabels(outputs.limconscatID);
+                        case 'all'
+                            treatmentLabels = file.treatmentLabels;
+                    end
+                    
+                    %Calc lims across ALL treatment groups for uniformity
+                    lims.boxmax =  ceil(max(cellfun(@(x) max(x(:,1)), resvec))/10)*10;
+                    lims.boxmin = floor(min(cellfun(@(x) min(x(:,1)), resvec))/10)*10;
                     chlabel  = inputs.ChannelLabel{cc};
                     calclbl2 = calcs.label{cc};
-                    IF_ncplot(plotflag, resvec,scatx, scaty, file.treatmentLabels, chlabel, calclbl2, file)
+                    IF_ncplot(plotflag, resvec,scatx, scaty, treatmentLabels, chlabel, calclbl2, file, lims)
                 end
             end
         end
@@ -298,8 +311,17 @@ if outputs.chanscat ==1
     resvec  = 0;
     calclbl = calcs.label;
     
+    %Subset of treatments to plot:
+    switch outputs.plotMode
+        case 'subset'
+            treatmentList = outputs.limconscatID;
+        case 'all'
+            treatmentList = 1:length(file.treatmentfold);
+    end
+    
+    
     %Assigning X and Y vectors
-    for nn = 1:length(file.treatmentfold)
+    for nn = treatmentList
         switch xchan
             case(1)
                 scatx = resvec_calc1{xcalcType,nn}(:,1);
@@ -327,12 +349,23 @@ if outputs.chanscat ==1
     
 end
 
+
+
+
+
+
+
 %% --------------  C. Multiple Treatments In One Scatter  --------:
 if outputs.conscat==1
     clear chlabel
     plotflag.type     = 'ConScatter';
-    plotflag.conTreat = 1:length(file.treatmentLabels);                    %Replace this with the actual list of treatments
     
+    switch outputs.plotMode
+        case 'subset'
+            plotflag.conTreat = outputs.limconscatID;
+        case 'all'
+            plotflag.conTreat = 1:length(file.treatmentLabels);                    %Replace this with the actual list of treatments
+    end
     lims.x = outputs.scatXlim;
     lims.y = outputs.scatYlim;
     xchan  = outputs.scatX;
@@ -344,7 +377,7 @@ if outputs.conscat==1
     
     
     chlabel{1} = [inputs.ChannelLabel{xchan} ' ' calcs.label{xchan}];
-    chlabel{2} = [inputs.ChannelLabel{xchan} ' ' calcs.label{xchan}];
+    chlabel{2} = [inputs.ChannelLabel{ychan} ' ' calcs.label{ychan}];
     
     %Unnecessary Inputs:
     resvec  = 0;
@@ -374,7 +407,7 @@ if outputs.conscat==1
     end
     
     %Keep colours consistent between ConScat and SingleScat:
-    plotflag.colours = 1:length(file.treatmentLabels); 
+    plotflag.colours = 1:length(file.treatmentLabels);
     
     IF_ncplot(plotflag, resvec,scatx, scaty, file.treatmentLabels, chlabel, calclbl, file, lims)
     
