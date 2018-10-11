@@ -235,9 +235,49 @@ for ctr2 = 1:length(file.treatmentfold)
         areaWhole_ch1  areaWhole_ch2   areaWhole_ch3    areaWhole_ch4
 end
 
+%% |----------- NORMALIZATION ------------|
+if calcs.normFlag
+    switch calcs.normType
+        case 'max'
+            normvals = cellfun(@(x) max(x(:,1)), resvec_calc1(:,calcs.normTo));
+        case 'min'
+            normvals = cellfun(@(x) min(x(:,1)), resvec_calc1(:,calcs.normTo));
+    end
+    
+    norm_resvec_calc1 = [];
+    norm_resvec_calc2 = [];
+    norm_resvec_calc3 = [];
+    norm_resvec_calc4 = [];
+    
+    for c2 = 1:size(resvec_calc1,1)
+        norm_resvec_calc1 = [norm_resvec_calc1; cellfun(@(x) x./normvals(c2), resvec_calc1(c2,:), 'UniformOutput', 0)];
+        norm_resvec_calc2 = [norm_resvec_calc2; cellfun(@(x) x./normvals(c2), resvec_calc2(c2,:), 'UniformOutput', 0)];
+        norm_resvec_calc3 = [norm_resvec_calc3; cellfun(@(x) x./normvals(c2), resvec_calc3(c2,:), 'UniformOutput', 0)];
+        norm_resvec_calc4 = [norm_resvec_calc4; cellfun(@(x) x./normvals(c2), resvec_calc4(c2,:), 'UniformOutput', 0)];
+    end
+end
+
+
 %% --------------  A. Boxplots  --------:
 
 if outputs.boxplot==1
+    
+    %Swap save variables during normalization:
+    if calcs.normFlag
+        resvec_ch1 = norm_resvec_calc1;
+        resvec_ch2 = norm_resvec_calc2;
+        resvec_ch3 = norm_resvec_calc3;
+        resvec_ch4 = norm_resvec_calc4;
+        
+    else
+        resvec_ch1 = resvec_calc1;
+        resvec_ch2 = resvec_calc2;
+        resvec_ch3 = resvec_calc3;
+        resvec_ch4 = resvec_calc4;
+        
+    end
+    
+    
     activeChans = find(inputs.activeChans);                                %Reads the ChannelCalcs variable to decide which channels need calcs
     if ~isempty(activeChans)
         
@@ -253,13 +293,13 @@ if outputs.boxplot==1
                     
                     switch cc
                         case 1
-                            resvec = resvec_calc1(rr,:);
+                            resvec = resvec_ch1(rr,:);
                         case 2
-                            resvec = resvec_calc2(rr,:);
+                            resvec = resvec_ch2(rr,:);
                         case 3
-                            resvec = resvec_calc3(rr,:);
+                            resvec = resvec_ch3(rr,:);
                         case 4
-                            resvec = resvec_calc4(rr,:);
+                            resvec = resvec_ch4(rr,:);
                     end
                     
                     
@@ -271,9 +311,16 @@ if outputs.boxplot==1
                             treatmentLabels = file.treatmentLabels;
                     end
                     
-                    %Calc lims across ALL treatment groups for uniformity
-                    lims.boxmax =  ceil(max(cellfun(@(x) max(x(:,1)), resvec))/10)*10;
-                    lims.boxmin = floor(min(cellfun(@(x) min(x(:,1)), resvec))/10)*10;
+                    %Calculate Limits
+                    if outputs.boxAutoY
+                        lims.boxmax =  ceil(max(cellfun(@(x) max(x(:,1)), resvec))/10)*10;
+                        lims.boxmin = floor(min(cellfun(@(x) min(x(:,1)), resvec))/10)*10;
+                    else
+                        lims.boxmin = outputs.boxYlim(1);
+                        lims.boxmax = outputs.boxYlim(2);
+                    end
+                    
+                    lims.boxmean= cellfun(@(x) mean(x(:,1)), resvec); %mainly for printing
                     chlabel  = inputs.ChannelLabel{cc};
                     calclbl2 = calcs.label{cc};
                     IF_ncplot(plotflag, resvec,scatx, scaty, treatmentLabels, chlabel, calclbl2, file, lims)
@@ -288,6 +335,22 @@ end
 
 %% --------------  B. Single Treatment Scatter Plots  --------:
 if outputs.chanscat ==1
+    
+    %Swap save variables during normalization:
+    if calcs.normFlag
+        resvec_ch1 = norm_resvec_calc1;
+        resvec_ch2 = norm_resvec_calc2;
+        resvec_ch3 = norm_resvec_calc3;
+        resvec_ch4 = norm_resvec_calc4;
+        
+    else
+        resvec_ch1 = resvec_calc1;
+        resvec_ch2 = resvec_calc2;
+        resvec_ch3 = resvec_calc3;
+        resvec_ch4 = resvec_calc4;
+        
+    end
+    
     
     clear chlabel
     xchan  = outputs.scatX;
@@ -324,25 +387,47 @@ if outputs.chanscat ==1
     for nn = treatmentList
         switch xchan
             case(1)
-                scatx = resvec_calc1{xcalcType,nn}(:,1);
+                scatx    = resvec_ch1{xcalcType,nn}(:,1);
+                resvecX   = resvec_ch1;
             case(2)
-                scatx = resvec_calc2{xcalcType,nn}(:,1);
+                scatx = resvec_ch2{xcalcType,nn}(:,1);
+                resvecX   = resvec_ch2;
             case(3)
-                scatx = resvec_calc3{xcalcType,nn}(:,1);
+                scatx = resvec_ch3{xcalcType,nn}(:,1);
+                resvecX   = resvec_ch3;
             case(4)
-                scatx = resvec_calc4{xcalcType,nn}(:,1);
-        end
-        switch ychan
-            case(1)
-                scaty = resvec_calc1{ycalcType,nn}(:,1);
-            case(2)
-                scaty = resvec_calc2{ycalcType,nn}(:,1);
-            case(3)
-                scaty = resvec_calc3{ycalcType,nn}(:,1);
-            case(4)
-                scaty = resvec_calc4{ycalcType,nn}(:,1);
+                scatx = resvec_ch4{xcalcType,nn}(:,1);
+                resvecX   = resvec_ch4;
         end
         
+        switch ychan
+            case(1)
+                scaty = resvec_ch1{ycalcType,nn}(:,1);
+                resvecY   = resvec_ch1;
+            case(2)
+                scaty = resvec_ch2{ycalcType,nn}(:,1);
+                resvecY   = resvec_ch2;
+            case(3)
+                scaty = resvec_ch3{ycalcType,nn}(:,1);
+                resvecY   = resvec_ch3;
+            case(4)
+                scaty = resvec_ch4{ycalcType,nn}(:,1);
+                resvecY   = resvec_ch4;
+        end
+        
+        
+        %Set auto limits:
+        if outputs.scatAutoX
+            lims.x = [floor(min(cellfun(@(x) min(x(:,1)), resvecX(xcalcType,:)))/10)*10 ...
+                ceil(max(cellfun(@(x) max(x(:,1)), resvecX(xcalcType,:)))/10)*10];
+        end
+        
+        if outputs.scatAutoY
+            lims.y = [floor(min(cellfun(@(x) min(x(:,1)), resvecY(xcalcType,:)))/10)*10 ...
+                ceil(max(cellfun(@(x) max(x(:,1)), resvecY(xcalcType,:)))/10)*10];
+        end
+        
+        %Plotflag keeps track of the colours for single scatters
         plotflag.singTreat = nn;
         IF_ncplot(plotflag, resvec, scatx, scaty, file.treatmentLabels{nn}, chlabel, calclbl, file, lims)
     end
@@ -352,11 +437,25 @@ end
 
 
 
-
-
-
 %% --------------  C. Multiple Treatments In One Scatter  --------:
 if outputs.conscat==1
+    
+    %Swap save variables during normalization:
+    if calcs.normFlag
+        resvec_ch1 = norm_resvec_calc1;
+        resvec_ch2 = norm_resvec_calc2;
+        resvec_ch3 = norm_resvec_calc3;
+        resvec_ch4 = norm_resvec_calc4;
+        
+    else
+        resvec_ch1 = resvec_calc1;
+        resvec_ch2 = resvec_calc2;
+        resvec_ch3 = resvec_calc3;
+        resvec_ch4 = resvec_calc4;
+        
+    end
+    
+    
     clear chlabel
     plotflag.type     = 'ConScatter';
     
@@ -386,32 +485,68 @@ if outputs.conscat==1
     %Reading out X and Y into vectors:
     switch xchan
         case(1)
-            scatx = resvec_calc1(xcalcType,:);
+            scatx = resvec_ch1(xcalcType,:);
+            resvecX   = resvec_ch1;
         case(2)
-            scatx = resvec_calc2(xcalcType,:);
+            scatx = resvec_ch2(xcalcType,:);
+            resvecX   = resvec_ch2;
         case(3)
-            scatx = resvec_calc3(xcalcType,:);
+            scatx = resvec_ch3(xcalcType,:);
+            resvecX   = resvec_ch3;
         case(4)
-            scatx = resvec_calc4(xcalcType,:);
+            scatx = resvec_ch4(xcalcType,:);
+            resvecX   = resvec_ch4;
     end
     
     switch ychan
         case(1)
-            scaty = resvec_calc1(ycalcType,:);
+            scaty = resvec_ch1(ycalcType,:);
+            resvecY   = resvec_ch1;
         case(2)
-            scaty = resvec_calc2(ycalcType,:);
+            scaty = resvec_ch2(ycalcType,:);
+            resvecY   = resvec_ch2;
         case(3)
-            scaty = resvec_calc3(ycalcType,:);
+            scaty = resvec_ch3(ycalcType,:);
+            resvecY   = resvec_ch3;
         case(4)
-            scaty = resvec_calc4(ycalcType,:);
+            scaty = resvec_ch4(ycalcType,:);
+            resvecY   = resvec_ch4;
     end
     
     %Keep colours consistent between ConScat and SingleScat:
     plotflag.colours = 1:length(file.treatmentLabels);
     
+    %Auto limits
+    if outputs.scatAutoX
+        lims.x = [floor(min(cellfun(@(x) min(x(:,1)), resvecX(xcalcType,:)))/10)*10 ...
+            ceil(max(cellfun(@(x) max(x(:,1)), resvecX(xcalcType,:)))/10)*10];
+    end
+    
+    if outputs.scatAutoY
+        lims.y = [floor(min(cellfun(@(x) min(x(:,1)), resvecY(xcalcType,:)))/10)*10 ...
+            ceil(max(cellfun(@(x) max(x(:,1)), resvecY(xcalcType,:)))/10)*10];
+    end
     IF_ncplot(plotflag, resvec,scatx, scaty, file.treatmentLabels, chlabel, calclbl, file, lims)
     
     
 end
 save([file.outpath file.slashtype char(cleanNames({file.experimentName}, '_')) 'results.mat'], 'resvec_calc1', 'resvec_calc2', 'resvec_calc3', 'resvec_calc4');
+
+
+calcType = 1
+r_name = [];
+if ~isempty(r_name)
+    fileID = fopen([file.outpath file.slashtype '_Reformat.txt'],'w');
+    for tnum = 1:size(treatmentLabels,2)
+        tcell = horzcat(resvec_calc1{calcType, tnum}(:,1), resvec_calc2{calcType, tnum}(:,1), resvec_calc3{calcType, tnum}(:,1), resvec_calc4{calcType, tnum}(:,1));
+        fprintf(fileID, '%1$s\t\t\t\t\t\r\n', treatmentLabels{tnum})
+        
+        fprintf(fileID, '%1$s\t %2$s\t %3$s\t %4$s\t', calcs.label(1))
+    end
+    
+    
+    fprintf(fileID,'%1$s\t %2$s\t %3$s\t %4$s\t %5$s\t %6$s\t %7$s\t %8$s\t %9$s\r\n','TrackID', 'RiseTimes', 'FallTimes', 'ActiveFreq', 'ActiveLength', 'TotalLength', 'ActiveFraction', 'PeakNums', 'PeakFrequency');
+    fprintf(fileID, '%d\t %d\t %d\t %d\t %d\t %d\t %d\t %d\t %d\r\n', horzcat(peaknums{cc,ii}(:,2), risetimes{cc,ii}(:,1),falltimes{cc,ii}(:,1), rapidfreq{cc,ii}(:,1), trackLength_rapid{cc,ii}(:,1), trackLength_tot{cc,ii}(:,1), trackLength_ActiveFrac{cc,ii}(:,1), peaknums{cc,ii}(:,1), norm_peaknums{cc,ii}(:,1))')
+end
+
 end

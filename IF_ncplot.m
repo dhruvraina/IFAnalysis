@@ -5,7 +5,7 @@
 %Last Edit: 180822
 
 function IF_ncplot(plotflag, resvec, scatx, scaty, pathlist_labels, ChannelLabel, calclbl, file, lims)
-colors = brewermap(length(file.treatmentLabels), 'Set2');
+colors = brewermap(length(file.treatmentLabels), 'Set3');  %'Set2'
 switch plotflag.type
     
     
@@ -165,8 +165,8 @@ switch plotflag.type
         fig2 = figure
         notBoxPlot(tempvec(:,1), tempvec(:,2))
         set(gca, 'XTickLabel', pathlist_labels)
-        title(['Median ' char(ChannelLabel) ' ' calclbl ' Intensity Per Cell'])
-        ylabel('Median Intensity')
+        title(['Mean ' char(ChannelLabel) ' ' calclbl ' Intensity Per Cell'])
+        ylabel('Mean Intensity')
         
         ylim([lims.boxmin lims.boxmax])
         fig2.PaperUnits    = 'inches';
@@ -209,12 +209,13 @@ switch plotflag.type
         
         %Plotting:
         fig2 = figure, UnivarScatter(dataArray, 'RangeCut', 30, 'Label', pathlist_labels, 'Whiskers', 'lines', 'PointSize', 12);
-        ylabel('Median Intensity')
-        title(['Median ' char(ChannelLabel) ' ' calclbl ' Intensity Per Cell'])
+        ylabel('Mean Intensity')
+        title(['Mean ' char(ChannelLabel) ' ' calclbl ' Intensity Per Cell'])
         
         ylim([lims.boxmin lims.boxmax])
         fig2.PaperUnits = 'inches';
         fig2.PaperPosition = [0 0 10 6];
+        annotation('textbox', [0.15 0.65 .8 .1], 'String', num2str(lims.boxmean), 'FitBoxToText','on')
         set(gca,'FontSize', 14)
         if ~isdir([file.outpath file.slashtype 'BoxPlot2'])
             mkdir([file.outpath file.slashtype 'BoxPlot2']);
