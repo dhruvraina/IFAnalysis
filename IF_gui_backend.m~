@@ -270,7 +270,7 @@ if calcs.normFlag
     end
 end
 
-%%    ----  RatioPlots  ----:
+%% ----RatioPlots:
 if calcs.Ratios
     plotflag.type = 'boxplot2'
     scatx  = 0;
@@ -286,9 +286,9 @@ if calcs.Ratios
                 treatmentLabels = file.treatmentLabels;
         end
         
-        if     cc == 1
+        if cc == 1
             chlabel = inputs.ChannelLabel{outputs.scatX};
-        elseif cc == 2
+        elseif cc ==2
             chlabel = inputs.ChannelLabel{outputs.scatY};
         end
         

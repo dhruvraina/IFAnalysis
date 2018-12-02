@@ -5,7 +5,7 @@
 %Last Edit: 180822
 
 function IF_ncplot(plotflag, resvec, scatx, scaty, pathlist_labels, ChannelLabel, calclbl, file, lims)
-colors = brewermap(length(file.treatmentLabels), 'Set2');  %'Set2'
+colors = brewermap(length(file.treatmentLabels), 'Set3');  %'Set2'
 switch plotflag.type
     
     
@@ -23,10 +23,10 @@ switch plotflag.type
  
             %Plot marginal distributions
             sbplt1 = subplot(2,2,2)
-            histogram(scaty, lims.y(1):ybins:lims.y(2), 'Normalization', 'probability', 'FaceColor', colors(treatmentNo,:));
+            histogram(scaty, lims.y(1):ybins:lims.y(2), 'Normalization', 'countdensity', 'FaceColor', colors(treatmentNo,:));
             view([90 -90])
             sbplt2 = subplot(2,2,3)
-            histogram(scatx, lims.x(1):xbins:lims.x(2), 'Normalization', 'probability', 'FaceColor', colors(treatmentNo,:));
+            histogram(scatx, lims.x(1):xbins:lims.x(2), 'Normalization', 'countdensity', 'FaceColor', colors(treatmentNo,:));
             view([0,-90])
             
             %Plot scatter last so its the gca for xlim ylim etc. later
@@ -104,11 +104,11 @@ switch plotflag.type
                 %Plot marginal distributions
                 sbplt1 = subplot(2,2,2)
                 hold on
-                histogram(yvals, lims.y(1):ybins:lims.y(2),'Normalization', 'probability', 'FaceColor', colors(ctr1,:)); %changed from countdensity
+                histogram(yvals, lims.y(1):ybins:lims.y(2), 'Normalization', 'countdensity', 'FaceColor', colors(ctr1,:));
                 view([90 -90])
                 sbplt2 = subplot(2,2,3)
                 hold on
-                histogram(xvals, lims.x(1):xbins:lims.x(2),'Normalization', 'probability', 'FaceColor', colors(ctr1,:));
+                histogram(xvals, lims.x(1):xbins:lims.x(2),'Normalization', 'countdensity', 'FaceColor', colors(ctr1,:));
                 view([0,-90])
                 
                 %Plot scatter last so its the gca for xlim ylim etc. later
@@ -215,12 +215,7 @@ switch plotflag.type
         %Fill in values from tempvec
         for cc = 1:nTreatments
             tvec2 = tempvec(tempvec(:,2)==cc,1);
-            
-            if all(tvec2)==0
-                tvec2(1) = 0.00001;
-                msgbox('Warning: setting one value from 0 to 0.0001 so the plots work properly')
-            end
-            
+            if tve
             dataArray(1:length(tvec2),cc) = tvec2;
             clear tvec2
         end

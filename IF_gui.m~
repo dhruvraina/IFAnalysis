@@ -428,7 +428,7 @@ if val
     set(handles.etx_SetYThresh, 'Enable', 'On');
 else
     set(handles.etx_SetXThresh, 'Enable', 'Off');
-    set(handles.etx_SetYThresh, 'Enable', 'Off');
+    set(etx_SetYThresh, 'Enable', 'Off');
 end
 guidata(hObject, handles)
 
@@ -552,13 +552,8 @@ end
 
 %Axis Thresholds:
 if get(handles.chk_AxisThresh, 'Value')
-    handles.calcs.XAxisThresh = str2double(get(handles.etx_SetXThresh, 'String'));
-    handles.calcs.YAxisThresh = str2double(get(handles.etx_SetYThresh, 'String'));
-    handles.calcs.Ratios = 1;
-else
-    handles.calcs.XAxisThresh = 0;
-    handles.calcs.YAxisThresh = 0;
-    handles.calcs.Ratios      = 0;
+    calcs.XAxisThresh = str2double(get(handles.etx_SetXThresh, 'String'));
+    calcs.YAxisThresh = str2double(get(handles.etx_SetYThresh, 'String'));
 end
 
 %Save metadata:
