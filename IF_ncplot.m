@@ -4,8 +4,8 @@
 %Author: draina
 %Last Edit: 180822
 
-function IF_ncplot(plotflag, resvec, scatx, scaty, pathlist_labels, ChannelLabel, calclbl, file, lims)
-colors = brewermap(length(file.treatmentLabels), 'Set2');  %'Set2'
+function IF_ncplot(plotflag, resvec, scatx, scaty, scatz, pathlist_labels, ChannelLabel, calclbl, file, lims)
+colors = brewermap(length(file.treatmentLabels), 'Spectral');  %'Set2'
 switch plotflag.type
     
     
@@ -87,20 +87,22 @@ switch plotflag.type
         treatments = nonzeros(plotflag.conTreat)';
         fig1       = figure
         hold on
-        
+        cnt1 = 1;
         
         %Plot each treatment sequentially:
         for ctr1  = treatments
               xvals           = scatx{ctr1}(:,1);
               yvals           = scaty{ctr1}(:,1);
-              legendary{ctr1} = [pathlist_labels{ctr1} '; No. of cells: ' num2str(length(xvals))];
-            
-            if plotflag.margDist
+              zvals           = scatz{ctr1}(:,1);
+              legendary{cnt1} = [pathlist_labels{ctr1} '; No. of cells: ' num2str(length(xvals))];
+              cnt1            = cnt1+1;
+              
+            if plotflag.margDist && ~plotflag.tdplot
                 %Build the marginal distributions
                 nbins = 20;
                 xbins = (lims.x(2)-lims.x(1))/nbins;
                 ybins = (lims.y(2)-lims.y(1))/nbins;
-                
+
                 %Plot marginal distributions
                 sbplt1 = subplot(2,2,2)
                 hold on
@@ -117,22 +119,30 @@ switch plotflag.type
                 scatter(xvals, yvals, 'filled', ...
                     'MarkerFaceColor', colors(ctr1,:), ...
                     'MarkerFaceAlpha',3/7)
-              
+                % %Setting the aspect ratio and repositioning the subplots
+                sbplt1.Position = [sbplt1.Position(1), sbplt1.Position(2)    sbplt1.Position(3)/4, sbplt1.Position(4)  ]
+                sbplt2.Position = [sbplt2.Position(1), sbplt2.Position(2)*3,   sbplt2.Position(3), sbplt2.Position(4)/4]   
+                
+                plotflag.imageFormat = 'fig';
+
+            elseif plotflag.tdplot
+                %3d Plot
+                scatter3(xvals, yvals, zvals, 'filled', ...
+                    'MarkerFaceColor', colors(ctr1,:), ...
+                    'MarkerFaceAlpha', 5/7)
+                view(18,33)
+                zlim(lims.z)
+                zlabel([ChannelLabel{1,3} ' intensity (a.u.)'])
+                grid on
+                plotflag.imageFormat = 'fig';
+                
             else
                 scatter(xvals, yvals, 'filled', ...
                     'MarkerFaceColor', colors(ctr1,:), ...
                     'MarkerFaceAlpha',3/7)
-                
-                %lazy error handling:
-                sbplt1 = [1,1,1,1];
-                sbplt2 = [1,1,1,1];
+
             end
         end
-        
-        
-        %Setting the aspect ratio and repositioning the subplots
-        sbplt1.Position = [sbplt1.Position(1), sbplt1.Position(2)    sbplt1.Position(3)/4, sbplt1.Position(4)  ]
-        sbplt2.Position = [sbplt2.Position(1), sbplt2.Position(2)*3,   sbplt2.Position(3), sbplt2.Position(4)/4]   
         
         xlim(lims.x)
         ylim(lims.y)
@@ -156,9 +166,13 @@ switch plotflag.type
         switch plotflag.imageFormat
             case 'svg'
                 print(fig1,[file.outpath file.slashtype 'Con_Scatter' file.slashtype 'ConScat'], '-painters', '-dsvg','-r200')
-            case'png'
+            case 'png'
                 print(fig1,[file.outpath file.slashtype 'Con_Scatter' file.slashtype 'ConScat'], '-painters', '-dpng','-r200')
+            case 'fig'
+                keyboard
         end
+        
+               
         
         close gcf
         

@@ -73,6 +73,7 @@ for ctr2 = 1:length(file.treatmentfold)
                 yRat = temptable.Mean(temptable.Ch==outputs.scatY);
                 xChanPositiveRat(cnt1) = size(xRat(xRat>calcs.XAxisThresh),1)/size(xRat,1);
                 yChanPositiveRat(cnt1) = size(yRat(yRat>calcs.YAxisThresh),1)/size(yRat,1);
+                doublePositiveRat(cnt1)= size(xRat((xRat>calcs.XAxisThresh)&(yRat>calcs.YAxisThresh)),1)/size(xRat,1);
                 
                 %empty variables:
                 [intDenWhole_ch1{cnt1}, intDenWhole_ch2{cnt1}, ...
@@ -224,7 +225,7 @@ for ctr2 = 1:length(file.treatmentfold)
     %Ratios:
     resvec_ratio{1, ctr2} = xChanPositiveRat';
     resvec_ratio{2, ctr2} = yChanPositiveRat';
-    
+    resvec_ratio{3, ctr2} = doublePositiveRat';
     %BackupCalcs
     resvec_another{1, ctr2} = [meanNuc_1; meanNuc_2; meanNuc_3; meanNuc_4];
     resvec_another{2, ctr2} = [meanCyt_1; meanCyt_2; meanCyt_3; meanCyt_4];
@@ -243,7 +244,7 @@ for ctr2 = 1:length(file.treatmentfold)
         areaNuc_ch1    areaNuc_ch2     areaNuc_ch3     areaNuc_ch4 ...
         intDenWhole_ch1 intDenWhole_ch2 intDenWhole_ch3 intDenWhole_ch4 ...
         areaWhole_ch1  areaWhole_ch2   areaWhole_ch3    areaWhole_ch4 ...
-        xChanPositiveRat    yChanPositiveRat
+        xChanPositiveRat    yChanPositiveRat    doublePositiveRat
 end
 
 %% |----------- NORMALIZATION ------------|
@@ -270,11 +271,17 @@ if calcs.normFlag
     end
 end
 
+
+
+
+
 %%    ----  RatioPlots  ----:
 if calcs.Ratios
     plotflag.type = 'boxplot2'
     scatx  = 0;
     scaty  = 0;
+    scatz  = 0;
+    
     for cc = 1:size(resvec_ratio,1)
         resvec = resvec_ratio(cc,:);
         
@@ -286,10 +293,13 @@ if calcs.Ratios
                 treatmentLabels = file.treatmentLabels;
         end
         
-        if     cc == 1
+        switch cc
+            case 1
             chlabel = inputs.ChannelLabel{outputs.scatX};
-        elseif cc == 2
+            case 2
             chlabel = inputs.ChannelLabel{outputs.scatY};
+            case 3
+            chlabel = 'DoublePositive';
         end
         
         calclbl2 = 'Ratio';
@@ -298,7 +308,7 @@ if calcs.Ratios
         lims.boxmin = 0;
         lims.boxmean= cellfun(@(x) mean(x(:,1)), resvec);
         
-        IF_ncplot(plotflag, resvec,scatx, scaty, treatmentLabels, chlabel, calclbl2, file, lims)
+        IF_ncplot(plotflag, resvec,scatx, scaty, scatz, treatmentLabels, chlabel, calclbl2, file, lims)
     end
 end
 
@@ -331,6 +341,7 @@ if outputs.boxplot==1
         plotflag.type = 'boxplot2'                                         %boxplot1 is the basic NotBoxPlot;
         scatx = 0;                                                         %boxplot2 is the UnivarScatter plot;
         scaty = 0;
+        scatz = 0;
         
         for cc = activeChans                                               %Channels - in columns
             for rr = 1:size(calcs.all,1)                                   %Loop through different calculations - in rows
@@ -369,7 +380,7 @@ if outputs.boxplot==1
                     lims.boxmean= cellfun(@(x) mean(x(:,1)), resvec); %mainly for printing
                     chlabel  = inputs.ChannelLabel{cc};
                     calclbl2 = calcs.label{cc};
-                    IF_ncplot(plotflag, resvec,scatx, scaty, treatmentLabels, chlabel, calclbl2, file, lims)
+                    IF_ncplot(plotflag, resvec,scatx, scaty, scatz, treatmentLabels, chlabel, calclbl2, file, lims)
                 end
             end
         end
@@ -381,6 +392,8 @@ end
 
 %% --------------  B. Single Treatment Scatter Plots  --------:
 if outputs.chanscat ==1
+    
+    scatz = 0; %no 3D plot for single plots
     
     %Swap save variables during normalization:
     if calcs.normFlag
@@ -475,7 +488,7 @@ if outputs.chanscat ==1
         
         %Plotflag keeps track of the colours for single scatters
         plotflag.singTreat = nn;
-        IF_ncplot(plotflag, resvec, scatx, scaty, file.treatmentLabels{nn}, chlabel, calclbl, file, lims)
+        IF_ncplot(plotflag, resvec, scatx, scaty, scatz, file.treatmentLabels{nn}, chlabel, calclbl, file, lims)
     end
     
 end
@@ -485,6 +498,14 @@ end
 
 %% --------------  C. Multiple Treatments In One Scatter  --------:
 if outputs.conscat==1
+    
+     %hardcoding
+    outputs.scatZ     = 4;
+    outputs.scatZlim  = [0 250];
+    outputs.scatAutoZ = 1;
+    plotflag.tdplot   = 0%1;
+    
+    
     
     %Swap save variables during normalization:
     if calcs.normFlag
@@ -513,16 +534,20 @@ if outputs.conscat==1
     end
     lims.x = outputs.scatXlim;
     lims.y = outputs.scatYlim;
+    lims.z = outputs.scatZlim;
+    
     xchan  = outputs.scatX;
     ychan  = outputs.scatY;
+    zchan  = outputs.scatZ;
     
     %calcType : 1-Nuc, 2-Cyt, 3-WholeCell, 4-N/C Ratio 5-C/N Ratio
     xcalcType = find(calcs.all(:,xchan));
     ycalcType = find(calcs.all(:,ychan));
-    
-    
+    zcalcType = find(calcs.all(:,zchan));
+   
     chlabel{1} = [inputs.ChannelLabel{xchan} ' ' calcs.label{xchan}];
     chlabel{2} = [inputs.ChannelLabel{ychan} ' ' calcs.label{ychan}];
+    chlabel{3} = [inputs.ChannelLabel{zchan} ' ' calcs.label{zchan}];
     
     %Unnecessary Inputs:
     resvec  = 0;
@@ -559,6 +584,22 @@ if outputs.conscat==1
             resvecY   = resvec_ch4;
     end
     
+    switch zchan
+            case(1)
+                scatz    = resvec_ch1(zcalcType,:);
+                resvecZ  = resvec_ch1;
+            case(2)
+                scatz    = resvec_ch2(zcalcType,:);
+                resvecZ  = resvec_ch2;
+            case(3)
+                scatz    = resvec_ch3(zcalcType,:);
+                resvecZ  = resvec_ch3;
+            case(4)
+                scatz    = resvec_ch4(zcalcType,:);
+                resvecZ  = resvec_ch4;
+     end
+    
+    
     %Keep colours consistent between ConScat and SingleScat:
     plotflag.colours = 1:length(file.treatmentLabels);
     
@@ -572,9 +613,14 @@ if outputs.conscat==1
         lims.y = [floor(min(cellfun(@(x) min(x(:,1)), resvecY(xcalcType,:)))/10)*10 ...
             ceil(max(cellfun(@(x) max(x(:,1)), resvecY(xcalcType,:)))/10)*10];
     end
-    IF_ncplot(plotflag, resvec,scatx, scaty, file.treatmentLabels, chlabel, calclbl, file, lims)
     
+    if outputs.scatAutoZ
+            lims.z = [floor(min(cellfun(@(x) min(x(:,1)), resvecZ(xcalcType,:)))/10)*10 ...
+                ceil(max(cellfun(@(x) max(x(:,1)), resvecZ(xcalcType,:)))/10)*10];
+    end
     
+    IF_ncplot(plotflag, resvec,scatx, scaty, scatz, file.treatmentLabels, chlabel, calclbl, file, lims)
+        
 end
 save([file.outpath file.slashtype char(cleanNames({file.experimentName}, '_')) 'results.mat'], 'resvec_calc1', 'resvec_calc2', 'resvec_calc3', 'resvec_calc4');
 
