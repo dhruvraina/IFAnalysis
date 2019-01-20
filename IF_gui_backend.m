@@ -15,6 +15,11 @@ ch4 = 4;
 plotflag.imageFormat = outputs.imageFormat;
 plotflag.margDist    = outputs.margDist;
 
+%HardCoding
+plotflag.tdplot      = 0  %1;
+outputs.scatZ        = 3; %4 %Channel for Z axis
+
+
 for ctr2 = 1:length(file.treatmentfold)
     
     file.tdir = [file.path file.slashtype file.treatmentfold{ctr2}];
@@ -71,9 +76,12 @@ for ctr2 = 1:length(file.treatmentfold)
                 %Store per-image Ratio:
                 xRat = temptable.Mean(temptable.Ch==outputs.scatX);
                 yRat = temptable.Mean(temptable.Ch==outputs.scatY);
-                xChanPositiveRat(cnt1) = size(xRat(xRat>calcs.XAxisThresh),1)/size(xRat,1);
-                yChanPositiveRat(cnt1) = size(yRat(yRat>calcs.YAxisThresh),1)/size(yRat,1);
-                doublePositiveRat(cnt1)= size(xRat((xRat>calcs.XAxisThresh)&(yRat>calcs.YAxisThresh)),1)/size(xRat,1);
+                
+                xChanPositiveRat(cnt1) = size(  xRat((xRat>calcs.XAxisThresh) & (yRat<calcs.YAxisThresh)),1)  /size(xRat,1); %Only X Pos quadrant
+                yChanPositiveRat(cnt1) = size(  yRat((yRat>calcs.YAxisThresh) & (xRat<calcs.XAxisThresh)),1)  /size(yRat,1); %Only Y Pos quadrant
+                
+                doublePositiveRat(cnt1)= size(  xRat((xRat> calcs.XAxisThresh) & (yRat> calcs.YAxisThresh)),1)  /size(xRat,1); %Double Pos quadrant
+                doubleNegativeRat(cnt1)= size(  xRat((xRat<=calcs.XAxisThresh) & (yRat<=calcs.YAxisThresh)),1)  /size(xRat,1); %Double Neg quadrant <= corrects for points that fall on the thresholds
                 
                 %empty variables:
                 [intDenWhole_ch1{cnt1}, intDenWhole_ch2{cnt1}, ...
@@ -224,8 +232,10 @@ for ctr2 = 1:length(file.treatmentfold)
     
     %Ratios:
     resvec_ratio{1, ctr2} = xChanPositiveRat';
-    resvec_ratio{2, ctr2} = yChanPositiveRat';
-    resvec_ratio{3, ctr2} = doublePositiveRat';
+    resvec_ratio{3, ctr2} = yChanPositiveRat';
+    resvec_ratio{2, ctr2} = doublePositiveRat';
+    resvec_ratio{4, ctr2} = doubleNegativeRat';
+    
     %BackupCalcs
     resvec_another{1, ctr2} = [meanNuc_1; meanNuc_2; meanNuc_3; meanNuc_4];
     resvec_another{2, ctr2} = [meanCyt_1; meanCyt_2; meanCyt_3; meanCyt_4];
@@ -244,7 +254,7 @@ for ctr2 = 1:length(file.treatmentfold)
         areaNuc_ch1    areaNuc_ch2     areaNuc_ch3     areaNuc_ch4 ...
         intDenWhole_ch1 intDenWhole_ch2 intDenWhole_ch3 intDenWhole_ch4 ...
         areaWhole_ch1  areaWhole_ch2   areaWhole_ch3    areaWhole_ch4 ...
-        xChanPositiveRat    yChanPositiveRat    doublePositiveRat
+        xChanPositiveRat    yChanPositiveRat    doublePositiveRat   doubleNegativeRat
 end
 
 %% |----------- NORMALIZATION ------------|
@@ -277,39 +287,46 @@ end
 
 %%    ----  RatioPlots  ----:
 if calcs.Ratios
-    plotflag.type = 'boxplot2'
+    plotflag.type = 'stacked'
     scatx  = 0;
     scaty  = 0;
     scatz  = 0;
     
-    for cc = 1:size(resvec_ratio,1)
-        resvec = resvec_ratio(cc,:);
-        
-        switch outputs.plotMode
+       switch outputs.plotMode
             case 'subset'
-                resvec = resvec(:,outputs.limconscatID);
+                resvec_temp     = resvec_ratio(:,outputs.limconscatID);
                 treatmentLabels = file.treatmentLabels(outputs.limconscatID);
             case 'all'
+                resvec_temp     = resvec_ratio
                 treatmentLabels = file.treatmentLabels;
         end
+
         
-        switch cc
-            case 1
-            chlabel = inputs.ChannelLabel{outputs.scatX};
-            case 2
-            chlabel = inputs.ChannelLabel{outputs.scatY};
-            case 3
-            chlabel = 'DoublePositive';
-        end
+        chlabel.xChan = ['Only ' inputs.ChannelLabel{outputs.scatX} ' Pos. (Excludes DP)'];
+        chlabel.yChan = ['Only ' inputs.ChannelLabel{outputs.scatY} ' Pos. (Excludes DP)'];
+        chlabel.dPos  = 'Double Positive';
+        chlabel.dNeg  = 'Double Negative';
+        chlabel.title = [inputs.ChannelLabel{outputs.scatX} ' +ve >' ...
+                                      num2str(calcs.XAxisThresh) ' ' ...
+                         inputs.ChannelLabel{outputs.scatY} '+ve > ' ...
+                                      num2str(calcs.YAxisThresh)
+                            ];
         
         calclbl2 = 'Ratio';
         
+        
+        resvec(1,:) = cellfun(@(x) mean(x(:,1)), resvec_temp(1,:)); %Mean xChan Positive only, excludes double positive
+        resvec(2,:) = cellfun(@(x) mean(x(:,1)), resvec_temp(2,:)); %Mean yChan Positive only, excludes double positive
+        resvec(3,:) = cellfun(@(x) mean(x(:,1)), resvec_temp(3,:)); %Mean Double Positive
+        resvec(4,:) = cellfun(@(x) mean(x(:,1)), resvec_temp(4,:)); %Mean Double Negative
+        
+        IsEqualTo100 = sum(resvec(1:4,:))   %Check if the ratios all add up
+        
         lims.boxmax = 1;
         lims.boxmin = 0;
-        lims.boxmean= cellfun(@(x) mean(x(:,1)), resvec);
+        %lims.boxmean= cellfun(@(x) mean(x(:,1)), resvec); This has no place here
         
-        IF_ncplot(plotflag, resvec,scatx, scaty, scatz, treatmentLabels, chlabel, calclbl2, file, lims)
-    end
+        IF_ncplot(plotflag, resvec,scatx, scaty, scatz, treatmentLabels, chlabel, calclbl2, file, lims, calcs)
 end
 
 
@@ -380,7 +397,7 @@ if outputs.boxplot==1
                     lims.boxmean= cellfun(@(x) mean(x(:,1)), resvec); %mainly for printing
                     chlabel  = inputs.ChannelLabel{cc};
                     calclbl2 = calcs.label{cc};
-                    IF_ncplot(plotflag, resvec,scatx, scaty, scatz, treatmentLabels, chlabel, calclbl2, file, lims)
+                    IF_ncplot(plotflag, resvec,scatx, scaty, scatz, treatmentLabels, chlabel, calclbl2, file, lims, calcs)
                 end
             end
         end
@@ -488,7 +505,7 @@ if outputs.chanscat ==1
         
         %Plotflag keeps track of the colours for single scatters
         plotflag.singTreat = nn;
-        IF_ncplot(plotflag, resvec, scatx, scaty, scatz, file.treatmentLabels{nn}, chlabel, calclbl, file, lims)
+        IF_ncplot(plotflag, resvec, scatx, scaty, scatz, file.treatmentLabels{nn}, chlabel, calclbl, file, lims, calcs)
     end
     
 end
@@ -500,10 +517,8 @@ end
 if outputs.conscat==1
     
      %hardcoding
-    outputs.scatZ     = 4;
     outputs.scatZlim  = [0 250];
     outputs.scatAutoZ = 1;
-    plotflag.tdplot   = 0%1;
     
     
     
@@ -619,7 +634,7 @@ if outputs.conscat==1
                 ceil(max(cellfun(@(x) max(x(:,1)), resvecZ(xcalcType,:)))/10)*10];
     end
     
-    IF_ncplot(plotflag, resvec,scatx, scaty, scatz, file.treatmentLabels, chlabel, calclbl, file, lims)
+    IF_ncplot(plotflag, resvec,scatx, scaty, scatz, file.treatmentLabels, chlabel, calclbl, file, lims, calcs)
         
 end
 save([file.outpath file.slashtype char(cleanNames({file.experimentName}, '_')) 'results.mat'], 'resvec_calc1', 'resvec_calc2', 'resvec_calc3', 'resvec_calc4');

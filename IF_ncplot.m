@@ -4,7 +4,7 @@
 %Author: draina
 %Last Edit: 180822
 
-function IF_ncplot(plotflag, resvec, scatx, scaty, scatz, pathlist_labels, ChannelLabel, calclbl, file, lims)
+function IF_ncplot(plotflag, resvec, scatx, scaty, scatz, pathlist_labels, ChannelLabel, calclbl, file, lims, calcs)
 colors = brewermap(length(file.treatmentLabels), 'Spectral');  %'Set2'
 switch plotflag.type
     
@@ -87,6 +87,27 @@ switch plotflag.type
         treatments = nonzeros(plotflag.conTreat)';
         fig1       = figure
         hold on
+        
+        %Create the subplots out of loop to keep from overwriting.
+        %each subplot also needs its own explicit hold!
+        if plotflag.margDist && ~plotflag.tdplot
+            sbplt3 = subplot(2,2,1)
+            hold on
+            sbplt1 = subplot(2,2,2)
+            view([90 -90])
+            hold on
+            sbplt2 = subplot(2,2,3)
+            view([0,-90])
+            hold on
+            
+            %Setting the aspect ratio and repositioning the subplots
+            sbplt1.Position = [sbplt1.Position(1), sbplt1.Position(2)    sbplt1.Position(3)/4, sbplt1.Position(4)  ]
+            sbplt2.Position = [sbplt2.Position(1), sbplt2.Position(2)*3,   sbplt2.Position(3), sbplt2.Position(4)/4]
+            
+            %hard coding to save as fig
+            plotflag.imageFormat = 'fig';
+        end
+        
         cnt1 = 1;
         
         %Plot each treatment sequentially:
@@ -104,26 +125,19 @@ switch plotflag.type
                 ybins = (lims.y(2)-lims.y(1))/nbins;
 
                 %Plot marginal distributions
-                sbplt1 = subplot(2,2,2)
-                hold on
-                histogram(yvals, lims.y(1):ybins:lims.y(2),'Normalization', 'probability', 'FaceColor', colors(ctr1,:)); %changed from countdensity
-                view([90 -90])
-                sbplt2 = subplot(2,2,3)
-                hold on
-                histogram(xvals, lims.x(1):xbins:lims.x(2),'Normalization', 'probability', 'FaceColor', colors(ctr1,:));
-                view([0,-90])
+                histogram(sbplt1, yvals, lims.y(1):ybins:lims.y(2),'Normalization', 'probability', 'FaceColor', colors(ctr1,:)); %changed from countdensity
+                histogram(sbplt2, xvals, lims.x(1):xbins:lims.x(2),'Normalization', 'probability', 'FaceColor', colors(ctr1,:));
                 
-                %Plot scatter last so its the gca for xlim ylim etc. later
-                subplot(2,2,1)
-                hold on
-                scatter(xvals, yvals, 'filled', ...
+                %Plot scatter
+                scatter(sbplt3, xvals, yvals, 'filled', ...
                     'MarkerFaceColor', colors(ctr1,:), ...
                     'MarkerFaceAlpha',3/7)
-                % %Setting the aspect ratio and repositioning the subplots
-                sbplt1.Position = [sbplt1.Position(1), sbplt1.Position(2)    sbplt1.Position(3)/4, sbplt1.Position(4)  ]
-                sbplt2.Position = [sbplt2.Position(1), sbplt2.Position(2)*3,   sbplt2.Position(3), sbplt2.Position(4)/4]   
                 
-                plotflag.imageFormat = 'fig';
+                %Set scatter as gca so axis props will be correctly
+                %assigned later
+                figure(fig1)
+                subplot(sbplt3)
+
 
             elseif plotflag.tdplot
                 %3d Plot
@@ -137,11 +151,17 @@ switch plotflag.type
                 plotflag.imageFormat = 'fig';
                 
             else
-                scatter(xvals, yvals, 'filled', ...
+                scatter(xvals, yvals, 100, 'filled', ...
                     'MarkerFaceColor', colors(ctr1,:), ...
                     'MarkerFaceAlpha',3/7)
 
             end
+        end
+        
+        %Draw cutoff lines:
+        if calcs.Ratios
+            plot([1 1].*calcs.XAxisThresh, lims.y, '--k')
+            plot(lims.x, [1 1].*calcs.YAxisThresh, '--k')
         end
         
         xlim(lims.x)
@@ -149,6 +169,7 @@ switch plotflag.type
         xlabel([ChannelLabel{1,1} ' intensity (a.u.)'])
         ylabel([ChannelLabel{1,2} ' intensity (a.u.)'])
         title('Consolidated Scatter')
+        
         
         %Clean up empty legends + set props:
         cleaner    = cellfun(@(x) ~isempty(x), legendary);
@@ -260,6 +281,68 @@ switch plotflag.type
                 print(fig2,[file.outpath file.slashtype 'BoxPlot2' file.slashtype 'univ_'  calclbl '_' ChannelLabel], '-painters', '-dpng','-r200')
         end
         close gcf
+        
+
+        % --------------  E. Stacked Bar Plot for Ratios  --------:        
+    case('stacked')
+        %Redfining ChannelLabel as a struct for the stacked bar plots since they
+        %require a different order of the data.
+        resvec = resvec';
+        fig2 = figure
+
+%         %Horizontal Bar
+%         barh(resvec, 0.9, 'stacked')
+%         set(gca, 'YTick', 1:length(pathlist_labels), 'YTickLabels', pathlist_labels)
+% 
+%        % Print the text labels inside the bar graph
+%         for i=1:size(resvec,1);
+%             for j=1:size(resvec,2);
+%                 if resvec(i,j)>0.1; %Don't print values less than 10% due to label space constraints
+%                     labels_stacked = num2str((floor(resvec(i,j)*100))/100);  %Round digits to nearest lower full percent
+%                     hText = text(sum(resvec(i,1:j),2), i, labels_stacked);
+%                     set(hText,'HorizontalAlignment', 'right','FontSize',14, 'Color','w');
+%                 end
+%             end
+%         end
+        
+        %Vertical Bar:
+        % Print the text labels inside the bar graph
+        bar(resvec, 0.9, 'stacked') 
+        set(gca, 'XTick', 1:length(pathlist_labels), 'XTickLabels', pathlist_labels)
+
+        for i=1:size(resvec,1)
+            for j=1:size(resvec,2)
+                if resvec(i,j)>0.06 %Don't print values less than 10% due to label space constraints
+                    labels_stacked = num2str((floor(resvec(i,j)*100))/100);  %Round digits to nearest lower full percent
+                    hText = text(i, sum(resvec(i,1:j),2), labels_stacked);
+                    set(hText,'VerticalAlignment', 'top', 'HorizontalAlignment', 'center','FontSize',14, 'Color','w');
+                end
+            end
+        end
+        
+        
+        
+        
+        legend(ChannelLabel.xChan, ChannelLabel.dPos, ChannelLabel.yChan, ChannelLabel.dNeg)
+        xlabel('Ratio')
+        title(ChannelLabel.title)
+        
+        fig2.PaperUnits = 'inches';
+        fig2.PaperPosition = [0 0 10 10];
+        set(gca,'FontSize', 14)
+        if ~isdir([file.outpath file.slashtype 'StackedBar'])
+            mkdir([file.outpath file.slashtype 'StackedBar']);
+        end
+        
+        switch plotflag.imageFormat
+            case 'svg'
+                print(fig2,[file.outpath file.slashtype 'StackedBar' file.slashtype 'RatioStacked'], '-painters', '-dsvg','-r200')
+            case 'png'
+                print(fig2,[file.outpath file.slashtype 'StackedBar' file.slashtype 'RatioStacked'], '-painters', '-dpng','-r200')
+        end
+        close gcf
+        
+        
 end
 end
 
