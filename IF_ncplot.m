@@ -82,7 +82,7 @@ switch plotflag.type
         
         
         
-        % --------------  B. Multiple Treatments In One Scatter  --------:
+       % --------------  B. Multiple Treatments In One Scatter  --------:
     case('ConScatter')
         treatments = nonzeros(plotflag.conTreat)';
         fig1       = figure
@@ -243,9 +243,9 @@ switch plotflag.type
         tempvec = cell2mat(resvec');
         
         %Make an empty matrix with nans
-        maxLength = max(cell2mat(cellfun(@(x) length(x), resvec, 'UniformOutput', 0)));
+        maxLength   = max(cell2mat(cellfun(@(x) length(x), resvec, 'UniformOutput', 0)));
         nTreatments = size(resvec,2);
-        dataArray = nan(maxLength, nTreatments);
+        dataArray   = nan(maxLength, nTreatments);
         
         %Fill in values from tempvec
         for cc = 1:nTreatments
@@ -261,14 +261,17 @@ switch plotflag.type
         end
         
         %Plotting:
+        figWide = length(pathlist_labels)*2.3;
+        figTall = 7;
+        
         fig2 = figure, UnivarScatter(dataArray, 'RangeCut', 30, 'Label', pathlist_labels, 'Whiskers', 'lines', 'PointSize', 12);
         ylabel('Mean Intensity')
         title(['Mean ' char(ChannelLabel) ' ' calclbl ' Intensity Per Cell'])
         
         ylim([lims.boxmin lims.boxmax])
-        fig2.PaperUnits = 'inches';
-        fig2.PaperPosition = [0 0 10 6];
-        annotation('textbox', [0.15 0.65 .8 .1], 'String', num2str(lims.boxmean), 'FitBoxToText','on')
+        fig2.PaperUnits    = 'inches';
+        fig2.PaperPosition =  [0 0 figWide figTall];
+        annotation('textbox', [0.3 0.3 .9 .7], 'String', num2str(lims.boxmean), 'FitBoxToText','on')
         set(gca,'FontSize', 14)
         if ~isdir([file.outpath file.slashtype 'BoxPlot2'])
             mkdir([file.outpath file.slashtype 'BoxPlot2']);
@@ -289,46 +292,70 @@ switch plotflag.type
         %require a different order of the data.
         resvec = resvec';
         fig2 = figure
-
-%         %Horizontal Bar
-%         barh(resvec, 0.9, 'stacked')
-%         set(gca, 'YTick', 1:length(pathlist_labels), 'YTickLabels', pathlist_labels)
-% 
-%        % Print the text labels inside the bar graph
-%         for i=1:size(resvec,1);
-%             for j=1:size(resvec,2);
-%                 if resvec(i,j)>0.1; %Don't print values less than 10% due to label space constraints
-%                     labels_stacked = num2str((floor(resvec(i,j)*100))/100);  %Round digits to nearest lower full percent
-%                     hText = text(sum(resvec(i,1:j),2), i, labels_stacked);
-%                     set(hText,'HorizontalAlignment', 'right','FontSize',14, 'Color','w');
-%                 end
-%             end
-%         end
+        barWide = 10;
+        barTall = 10;
+        horzBar = 0;
+        vertBar = 1;
         
-        %Vertical Bar:
-        % Print the text labels inside the bar graph
-        bar(resvec, 0.9, 'stacked') 
-        set(gca, 'XTick', 1:length(pathlist_labels), 'XTickLabels', pathlist_labels)
-
-        for i=1:size(resvec,1)
-            for j=1:size(resvec,2)
-                if resvec(i,j)>0.06 %Don't print values less than 10% due to label space constraints
-                    labels_stacked = num2str((floor(resvec(i,j)*100))/100);  %Round digits to nearest lower full percent
-                    hText = text(i, sum(resvec(i,1:j),2), labels_stacked);
-                    set(hText,'VerticalAlignment', 'top', 'HorizontalAlignment', 'center','FontSize',14, 'Color','w');
+        %Horizontal Bar:
+        if horzBar
+            h = barh(resvec, 0.9, 'stacked')
+            set(gca, 'YTick', 1:length(pathlist_labels), 'YTickLabels', pathlist_labels)
+            barTall = length(pathlist_labels)*2;
+            xName   = 'Fraction';
+            yName   = '';
+            
+            % Print the text labels inside the bar graph
+            for i=1:size(resvec,1)
+                for j=1:size(resvec,2)
+                    if resvec(i,j)>0.1                                           %Don't print values less than 10% due to label space constraints
+                        labels_stacked = num2str((floor(resvec(i,j)*100))/100);  %Round digits to nearest lower full percent
+                        hText          = text(sum(resvec(i,1:j),2), i, labels_stacked);
+                        set(hText,'HorizontalAlignment', 'right','FontSize',14, 'Color','w');
+                    end
                 end
             end
         end
         
+        %Vertical Bar:
+        if vertBar
+            h = bar(resvec, 0.9, 'stacked')
+            set(gca, 'XTick', 1:length(pathlist_labels), 'XTickLabels', pathlist_labels)
+            barWide = length(pathlist_labels)*2;
+            xName   = '';
+            yName   = 'Fraction';
+            
+          % Print the text labels inside the bar graph
+            for i=1:size(resvec,1)
+                for j=1:size(resvec,2)
+                    if resvec(i,j)>0.06                                          %Don't print values less than x% due to label space constraints
+                        labels_stacked = num2str((floor(resvec(i,j)*100))/100);  %Round digits to nearest lower full percent
+                        hText          = text(i, sum(resvec(i,1:j),2), labels_stacked);
+                        set(hText,'VerticalAlignment', 'top', 'HorizontalAlignment', 'center','FontSize',14, 'Color','w');
+                    end
+                end
+            end
+            
+        end
+        %Setting custom colours:
+        colmap = [136  40 144;  %Purple
+                   60 191 189;  %Blue
+                    0 126  61;  %Green
+                  241  90  41]; %Orange
+        colmap = colmap./256;   %convert from rgb space to [0 1]
         
-        
+        h(1).FaceColor = colmap(1,:)
+        h(2).FaceColor = colmap(2,:)
+        h(3).FaceColor = colmap(3,:)
+        h(4).FaceColor = colmap(4,:)
         
         legend(ChannelLabel.xChan, ChannelLabel.dPos, ChannelLabel.yChan, ChannelLabel.dNeg)
-        xlabel('Ratio')
+        xlabel(xName)
+        ylabel(yName)
         title(ChannelLabel.title)
         
         fig2.PaperUnits = 'inches';
-        fig2.PaperPosition = [0 0 10 10];
+        fig2.PaperPosition = [0 0 barWide barTall];
         set(gca,'FontSize', 14)
         if ~isdir([file.outpath file.slashtype 'StackedBar'])
             mkdir([file.outpath file.slashtype 'StackedBar']);

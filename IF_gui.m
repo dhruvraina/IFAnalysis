@@ -565,7 +565,7 @@ end
 handlesLoad = handles;
 save([handles.file.path handles.file.slashtype char(cleanNames({handles.file.experimentName}, '_')) 'meta.mat'], 'handlesLoad');
 
-
+disp('Running... ')
 %Call Main Fx
 IF_gui_backend(handles.file, handles.inputs, handles.calcs, handles.outputs)
 
