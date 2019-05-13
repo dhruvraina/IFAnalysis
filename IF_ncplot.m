@@ -104,8 +104,8 @@ switch plotflag.type
             sbplt1.Position = [sbplt1.Position(1), sbplt1.Position(2)    sbplt1.Position(3)/4, sbplt1.Position(4)  ]
             sbplt2.Position = [sbplt2.Position(1), sbplt2.Position(2)*3,   sbplt2.Position(3), sbplt2.Position(4)/4]
             
-            %hard coding to save as fig
-            plotflag.imageFormat = 'fig';
+%             %hard coding to save as fig
+%             plotflag.imageFormat = 'fig';
         end
         
         cnt1 = 1;
@@ -148,7 +148,6 @@ switch plotflag.type
                 zlim(lims.z)
                 zlabel([ChannelLabel{1,3} ' intensity (a.u.)'])
                 grid on
-                plotflag.imageFormat = 'fig';
                 
             else
                 scatter(xvals, yvals, 100, 'filled', ...
@@ -190,7 +189,7 @@ switch plotflag.type
             case 'png'
                 print(fig1,[file.outpath file.slashtype 'Con_Scatter' file.slashtype 'ConScat'], '-painters', '-dpng','-r200')
             case 'fig'
-                keyboard
+                savefig(fig1, [file.outpath file.slashtype 'Con_Scatter' file.slashtype 'ConScat'])
         end
         
                
@@ -349,7 +348,7 @@ switch plotflag.type
         h(3).FaceColor = colmap(3,:)
         h(4).FaceColor = colmap(4,:)
         
-        legend(ChannelLabel.xChan, ChannelLabel.dPos, ChannelLabel.yChan, ChannelLabel.dNeg)
+        %legend(ChannelLabel.xChan, ChannelLabel.dPos, ChannelLabel.yChan, ChannelLabel.dNeg)
         xlabel(xName)
         ylabel(yName)
         title(ChannelLabel.title)
@@ -367,6 +366,19 @@ switch plotflag.type
             case 'png'
                 print(fig2,[file.outpath file.slashtype 'StackedBar' file.slashtype 'RatioStacked'], '-painters', '-dpng','-r200')
         end
+        
+        fileID = fopen([file.outpath file.slashtype file.experimentName '_Reformat.txt'],'w');
+        fprintf(fileID, '%1$s\t %2$s\t %3$s\t %4$s\t %5$s\r\n', 'Treatment', ChannelLabel.xChan, ChannelLabel.dPos, ChannelLabel.yChan, ChannelLabel.dNeg);
+        
+        for tnum = 1:size(pathlist_labels,2)
+            fprintf(fileID,'%1$s\t', pathlist_labels{tnum});
+            fprintf(fileID,'%5.4f\t %5.4f\t %5.4f\t %5.4f\r\n', resvec(tnum, 1:4));
+        end
+        fprintf(fileID, '%1$s\t', ChannelLabel.title);
+        fprintf(fileID,'%5.4f\t %5.4f\t %5.4f\t %5.4f\r\n', zeros(1, 4));
+            
+
+    
         close gcf
         
         

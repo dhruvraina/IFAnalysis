@@ -273,6 +273,7 @@ if handles.file.path ~= 0      % Assign the value if they didn't click cancel. T
 
     ctr             = 1;
     treatmentfolder = dir(handles.file.path);
+    handles.file.treatmentfold = []; %sanitize memory
     
     for aa = 3:length(treatmentfolder)
         tt_finder = strfind(treatmentfolder(aa).name(1:3), 'an_');
@@ -281,16 +282,15 @@ if handles.file.path ~= 0      % Assign the value if they didn't click cancel. T
             handles.file.treatmentfold{ctr} = char(treatmentfolder(aa).name);
             ctr                             = ctr+1;
         end
-        
-    end
+     end
     
     
 end
 
 
-set(handles.list_inputfiles,'Value',1); %Add this line to set the active item in the list box to the first item before repopulating the listbox. (Throws error otherwise)
+set(handles.list_inputfiles, 'Value',  1); %Add this line to set the active item in the list box to the first item before repopulating the listbox. (Throws error otherwise)
 set(handles.list_inputfiles, 'String', handles.file.treatmentfold)
-set(handles.etx_sourceFold, 'String', handles.file.path)
+set(handles.etx_sourceFold,  'String', handles.file.path)
 namefinder                  = strfind(handles.file.path, handles.file.slashtype);
 handles.file.experimentName = handles.file.path(namefinder(end)+1:end);
 
@@ -311,6 +311,7 @@ if ~isempty(metaname)
 end
 
 set(handles.pop_treatList, 'String', cleanNames(handles.file.treatmentfold))
+
 guidata(hObject, handles);
 
 
