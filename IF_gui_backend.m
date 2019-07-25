@@ -61,18 +61,22 @@ for ctr2 = 1:length(file.treatmentfold)
         switch nuc_cyt_flag
             case inputs.nucMaskPrefix
                 %%%%%%%%%%%%----------------------------------------------_%%%%%%-_%_%_%
-                %Store Integrated Density
-                intDenNuc_ch1{cnt1} = temptable.IntDen(temptable.Ch==ch1);
-                intDenNuc_ch2{cnt1} = temptable.IntDen(temptable.Ch==ch2);
-                intDenNuc_ch3{cnt1} = temptable.IntDen(temptable.Ch==ch3);
-                intDenNuc_ch4{cnt1} = temptable.IntDen(temptable.Ch==ch4);
+                                         %Store Integrated Density
+                                          intDenNuc_ch1{cnt1} = temptable.IntDen(temptable.Ch==ch1);
+                                          intDenNuc_ch2{cnt1} = temptable.IntDen(temptable.Ch==ch2);
+            if (max(temptable.Ch==ch3));  intDenNuc_ch3{cnt1} = temptable.IntDen(temptable.Ch==ch3); 
+                else;                     intDenNuc_ch3{cnt1} = zeros(length(nonzeros(temptable.Ch==ch1)),1); end
+            if (max(temptable.Ch==ch4));  intDenNuc_ch4{cnt1} = temptable.IntDen(temptable.Ch==ch4);
+                else;                     intDenNuc_ch4{cnt1} = zeros(length(nonzeros(temptable.Ch==ch1)),1); end
                 
-                %Store Area
-                areaNuc_ch1{cnt1} = temptable.Area(temptable.Ch==ch1);
-                areaNuc_ch2{cnt1} = temptable.Area(temptable.Ch==ch2);
-                areaNuc_ch3{cnt1} = temptable.Area(temptable.Ch==ch3);
-                areaNuc_ch4{cnt1} = temptable.Area(temptable.Ch==ch4);
-                
+                                         %Store Area
+                                          areaNuc_ch1{cnt1} = temptable.Area(temptable.Ch==ch1);
+                                          areaNuc_ch2{cnt1} = temptable.Area(temptable.Ch==ch2);
+            if (max(temptable.Ch==ch3));  areaNuc_ch3{cnt1} = temptable.Area(temptable.Ch==ch3);
+              else;                       areaNuc_ch3{cnt1} = zeros(length(nonzeros(temptable.Ch==ch1)),1); end
+            if (max(temptable.Ch==ch4));  areaNuc_ch4{cnt1} = temptable.Area(temptable.Ch==ch4);
+              else;                       areaNuc_ch4{cnt1} = zeros(length(nonzeros(temptable.Ch==ch1)),1); end
+              
                 %Store per-image Ratio:
                 xRat = temptable.Mean(temptable.Ch==outputs.scatX);
                 yRat = temptable.Mean(temptable.Ch==outputs.scatY);
@@ -93,7 +97,8 @@ for ctr2 = 1:length(file.treatmentfold)
                 cnt1 = cnt1+1;
             case inputs.cytMaskPrefix
                 
-                %Store Integrated Density:
+                %Store Integrated Density: ADD THE CHECK LINE 67-70 HERE AS
+                %WELL OTHERWISE WON'T HANDLE EMPTY CHANNELS
                 intDenWhole_ch1{cnt2} = temptable.IntDen(temptable.Ch==ch1);
                 intDenWhole_ch2{cnt2} = temptable.IntDen(temptable.Ch==ch2);
                 intDenWhole_ch3{cnt2} = temptable.IntDen(temptable.Ch==ch3);
@@ -139,13 +144,15 @@ for ctr2 = 1:length(file.treatmentfold)
     totAreaNuc_3 = cell2mat(areaNuc_ch3');
     totAreaNuc_4 = cell2mat(areaNuc_ch4');
     
-    
+    try
     %Estimating Cytoplasm:
     totIntCyt_1 = totIntWhole_1-totIntNuc_1;
     totIntCyt_2 = totIntWhole_2-totIntNuc_2;
     totIntCyt_3 = totIntWhole_3-totIntNuc_3;
     totIntCyt_4 = totIntWhole_4-totIntNuc_4;
-    
+    catch
+        keyboard
+    end
     totAreaCyt_1 = totAreaWhole_1-totAreaNuc_1;
     totAreaCyt_2 = totAreaWhole_2-totAreaNuc_2;
     totAreaCyt_3 = totAreaWhole_3-totAreaNuc_3;

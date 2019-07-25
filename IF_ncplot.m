@@ -5,7 +5,16 @@
 %Last Edit: 180822
 
 function IF_ncplot(plotflag, resvec, scatx, scaty, scatz, pathlist_labels, ChannelLabel, calclbl, file, lims, calcs)
+%Using Brewermap
 colors = brewermap(length(file.treatmentLabels), 'Spectral');  %'Set2'
+addpath([file.codeparent file.slashtype 'ExchangeTools']);
+
+%Using UniformPercepCols from matplotlib
+%col1   = viridis();
+col1   = magma();
+col2   = floor(length(col1)/length(file.treatmentLabels));
+colors = flipud(col1(1:col2:end,:));
+
 switch plotflag.type
     
     
@@ -42,8 +51,16 @@ switch plotflag.type
             scatter(scatx, scaty, 'filled', ...
                 'MarkerFaceColor', colors(treatmentNo,:), ...
                 'MarkerFaceAlpha',3/7)
+        %Setting the cutoff lines
+        if calcs.Ratios
+            hold on
+            plot([1 1].*calcs.XAxisThresh, lims.y, '--k')
+            plot(lims.x, [1 1].*calcs.YAxisThresh, '--k')
         end
         
+        end
+        
+       
         xlim(lims.x)
         ylim(lims.y)
         xlabel([ChannelLabel{1,1} ' ' ChannelLabel{2,1} ' Intensity (a.u.)'])
@@ -337,10 +354,10 @@ switch plotflag.type
             
         end
         %Setting custom colours:
-        colmap = [136  40 144;  %Purple
-                   60 191 189;  %Blue
-                    0 126  61;  %Green
-                  241  90  41]; %Orange
+        colmap = [217 111 171;  %Pink     GATA
+                  210 188  44;  %Yellow   DoublePositive
+                    0 168 110;  %Green    NANOG
+                  140 198 236]; %Blue     DoubleNegative
         colmap = colmap./256;   %convert from rgb space to [0 1]
         
         h(1).FaceColor = colmap(1,:)

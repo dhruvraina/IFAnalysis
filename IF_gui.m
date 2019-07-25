@@ -96,6 +96,7 @@ handles.calcs.normFlag    = 0;
 
 %Add tools
 addpath([handles.file.codeparent handles.file.slashtype 'DhruvTools']);
+addpath([handles.file.codeparent handles.file.slashtype 'ExchangeTools']);
 addpath([handles.file.codeparent handles.file.slashtype 'ExchangeTools' handles.file.slashtype 'UnivarScatter_v1.1']);
 addpath([handles.file.codeparent handles.file.slashtype 'ExchangeTools' handles.file.slashtype 'DrosteEffect-BrewerMap-a77e675']);
 addpath([handles.file.codeparent handles.file.slashtype 'ExchangeTools' handles.file.slashtype 'raacampbell-notBoxPlot-2fbf98c' handles.file.slashtype 'code']);
