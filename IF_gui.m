@@ -453,17 +453,33 @@ function pbt_RUN_Callback(hObject, eventdata, handles)
 handles.file.treatmentLabels = cleanNames(handles.file.treatmentfold, '_');
 
 %Inputs
+handles.inputs.ROImatching   = 1; %HARDCODED!!!
 handles.inputs.ch1lab        = get(handles.etx_ch1lbl, 'String');
 handles.inputs.ch2lab        = get(handles.etx_ch2lbl, 'String');
 handles.inputs.ch3lab        = get(handles.etx_ch3lbl, 'String');
 handles.inputs.ch4lab        = get(handles.etx_ch4lbl, 'String');
-handles.inputs.nucMaskPrefix = get(handles.etx_nucmaskPrefix, 'String');
-handles.inputs.cytMaskPrefix = get(handles.etx_cytmaskPrefix, 'String');
 handles.inputs.ChannelLabel  = get(handles.pop_xScat, 'String');
 handles.inputs.activeChans   = [get(handles.rdbt_calcCh1, 'Value') ...
     get(handles.rdbt_calcCh2, 'Value') ...
     get(handles.rdbt_calcCh3, 'Value') ...
     get(handles.rdbt_calcCh4, 'Value')];
+
+handles.inputs.nucMaskFlag   = get(handles.chk_nucMaskPrefix, 'Value');
+handles.inputs.cytMaskFlag   = get(handles.chk_cytMaskPrefix, 'Value');
+
+if handles.inputs.nucMaskFlag
+    handles.inputs.nucMaskPrefix = get(handles.etx_nucmaskPrefix, 'String');
+else
+    handles.inputs.nucMaskPrefix = 'none'
+end
+
+if handles.inputs.cytMaskFlag
+    handles.inputs.cytMaskPrefix = get(handles.etx_cytmaskPrefix, 'String');
+else
+    handles.inputs.cytMaskPrefix = 'none'
+end
+
+
 
 %Outputs
 
@@ -503,7 +519,7 @@ handles.outputs.CorrLine     = get(handles.chk_xCorr, 'Value');
 handles.outputs.margDist     = get(handles.chk_margDist, 'Value');
 
 %Calcs
-calclist(1:4) = 0;
+calclist(1:5) = 0;
 calclabels = get(handles.pop_ch1calc, 'String');
 [handles.calcs.nuc, handles.calcs.cyt, ...
     handles.calcs.wholeCell, ...

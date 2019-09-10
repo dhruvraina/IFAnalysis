@@ -270,6 +270,9 @@ switch plotflag.type
             if all(tvec2)==0
                 tvec2(1) = 0.00001;
                 msgbox('Warning: setting one value from 0 to 0.0001 so the plots work properly')
+            elseif max(isinf(tvec2))
+                tvec2(isinf(tvec2)) = 0.00001;
+                msgbox('Warning: setting one value from Inf to 0.0001 so plots work properly')
             end
             
             dataArray(1:length(tvec2),cc) = tvec2;

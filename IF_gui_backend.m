@@ -7,7 +7,7 @@
 
 function IF_gui_backend(file, inputs, calcs, outputs)
 %% Main
-%Can be Reordered here:
+%Can be reordered for debugging here:
 ch1 = 1;
 ch2 = 2;
 ch3 = 3;
@@ -16,7 +16,7 @@ plotflag.imageFormat = outputs.imageFormat;
 plotflag.margDist    = outputs.margDist;
 
 %HardCoding
-plotflag.tdplot      = 0  %1;
+plotflag.tdplot      = 0;  %1; 3D plot
 outputs.scatZ        = 3; %4 %Channel for Z axis
 
 
@@ -59,25 +59,26 @@ for ctr2 = 1:length(file.treatmentfold)
         end
         
         switch nuc_cyt_flag
-            case inputs.nucMaskPrefix
-                %%%%%%%%%%%%----------------------------------------------_%%%%%%-_%_%_%
-                                         %Store Integrated Density
-                                          intDenNuc_ch1{cnt1} = temptable.IntDen(temptable.Ch==ch1);
-                                          intDenNuc_ch2{cnt1} = temptable.IntDen(temptable.Ch==ch2);
-            if (max(temptable.Ch==ch3));  intDenNuc_ch3{cnt1} = temptable.IntDen(temptable.Ch==ch3); 
-                else;                     intDenNuc_ch3{cnt1} = zeros(length(nonzeros(temptable.Ch==ch1)),1); end
-            if (max(temptable.Ch==ch4));  intDenNuc_ch4{cnt1} = temptable.IntDen(temptable.Ch==ch4);
-                else;                     intDenNuc_ch4{cnt1} = zeros(length(nonzeros(temptable.Ch==ch1)),1); end
+            case inputs.nucMaskPrefix 
+                %Store Integrated Density (If/Else error handling for empty channels)
+                                                        intDenNuc_ch1{cnt1} = temptable.IntDen(temptable.Ch==ch1);
+                if (max(ismember(temptable.Ch, ch2)));  intDenNuc_ch2{cnt1} = temptable.IntDen(temptable.Ch==ch2);
+                else;                                   intDenNuc_ch2{cnt1} = zeros(length(nonzeros(temptable.Ch==ch1)),1); end
+                if (max(ismember(temptable.Ch, ch3)));  intDenNuc_ch3{cnt1} = temptable.IntDen(temptable.Ch==ch3); 
+                else;                                   intDenNuc_ch3{cnt1} = zeros(length(nonzeros(temptable.Ch==ch1)),1); end
+                if (max(ismember(temptable.Ch, ch4)));  intDenNuc_ch4{cnt1} = temptable.IntDen(temptable.Ch==ch4);
+                else;                                   intDenNuc_ch4{cnt1} = zeros(length(nonzeros(temptable.Ch==ch1)),1); end
                 
-                                         %Store Area
-                                          areaNuc_ch1{cnt1} = temptable.Area(temptable.Ch==ch1);
-                                          areaNuc_ch2{cnt1} = temptable.Area(temptable.Ch==ch2);
-            if (max(temptable.Ch==ch3));  areaNuc_ch3{cnt1} = temptable.Area(temptable.Ch==ch3);
-              else;                       areaNuc_ch3{cnt1} = zeros(length(nonzeros(temptable.Ch==ch1)),1); end
-            if (max(temptable.Ch==ch4));  areaNuc_ch4{cnt1} = temptable.Area(temptable.Ch==ch4);
-              else;                       areaNuc_ch4{cnt1} = zeros(length(nonzeros(temptable.Ch==ch1)),1); end
+                %Store Area (If/else error handling for empty channels)
+                                                        areaNuc_ch1{cnt1} = temptable.Area(temptable.Ch==ch1);
+                if (max(ismember(temptable.Ch, ch2)));  areaNuc_ch2{cnt1} = temptable.Area(temptable.Ch==ch2);
+                else;                                   areaNuc_ch2{cnt1} = zeros(length(nonzeros(temptable.Ch==ch1)),1); end
+                if (max(ismember(temptable.Ch, ch3)));  areaNuc_ch3{cnt1} = temptable.Area(temptable.Ch==ch3);
+                else;                                   areaNuc_ch3{cnt1} = zeros(length(nonzeros(temptable.Ch==ch1)),1); end
+                if (max(ismember(temptable.Ch, ch4)));  areaNuc_ch4{cnt1} = temptable.Area(temptable.Ch==ch4);
+                else;                                   areaNuc_ch4{cnt1} = zeros(length(nonzeros(temptable.Ch==ch1)),1); end
               
-                %Store per-image Ratio:
+                %Store per-image percentage positive etc: (How do I move this to work after nuc/cyt calcs??)
                 xRat = temptable.Mean(temptable.Ch==outputs.scatX);
                 yRat = temptable.Mean(temptable.Ch==outputs.scatY);
                 
@@ -87,48 +88,90 @@ for ctr2 = 1:length(file.treatmentfold)
                 doublePositiveRat(cnt1)= size(  xRat((xRat> calcs.XAxisThresh) & (yRat> calcs.YAxisThresh)),1)  /size(xRat,1); %Double Pos quadrant
                 doubleNegativeRat(cnt1)= size(  xRat((xRat<=calcs.XAxisThresh) & (yRat<=calcs.YAxisThresh)),1)  /size(xRat,1); %Double Neg quadrant <= corrects for points that fall on the thresholds
                 
-                %empty variables:
-                [intDenWhole_ch1{cnt1}, intDenWhole_ch2{cnt1}, ...
+                %Match ROIs exactly for n/c measurements
+                if inputs.ROImatching
+                    templist        = temptable.Label(temptable.Ch==ch1);
+                    ROInucIdx1      = cell2mat(strfind(templist(1), 'tif:')) +4;
+                    ROInucIdx2      = length(templist{1}) - cell2mat(strfind(templist(1), 'c:'))+2;         %truncate ROI name
+                    templist2       = cellfun(@(x) x(ROInucIdx1:end-ROInucIdx2), templist, 'UniformOutput', 0);
+                    templist3       = cleanNames(templist2, '-');     %Done twice because I'm too lazy to fix it in cleanNames.m
+                    ROInuc{cnt1}    = str2double(cleanNames(templist3, '-'))';
+                end
+                
+                %Empty variables if no cytoplasm mask is selected:
+                if ~inputs.cytMaskFlag
+                [   intDenWhole_ch1{cnt1}, intDenWhole_ch2{cnt1}, ...
                     intDenWhole_ch3{cnt1}, intDenWhole_ch4{cnt1}, ...
                     areaWhole_ch1{cnt1},   areaWhole_ch2{cnt1}, ...
                     areaWhole_ch3{cnt1},   areaWhole_ch4{cnt1}, ...
-                    ] = deal(zeros(size(areaNuc_ch2{cnt1})));
-                
+                    ] = deal(zeros(size(areaNuc_ch1{cnt1})));
+                end
                 cnt1 = cnt1+1;
+                
+                
             case inputs.cytMaskPrefix
-                
-                %Store Integrated Density: ADD THE CHECK LINE 67-70 HERE AS
-                %WELL OTHERWISE WON'T HANDLE EMPTY CHANNELS
-                intDenWhole_ch1{cnt2} = temptable.IntDen(temptable.Ch==ch1);
-                intDenWhole_ch2{cnt2} = temptable.IntDen(temptable.Ch==ch2);
-                intDenWhole_ch3{cnt2} = temptable.IntDen(temptable.Ch==ch3);
-                intDenWhole_ch4{cnt2} = temptable.IntDen(temptable.Ch==ch4);
-                
+                %Store Integrated Density
+                                                        intDenWhole_ch1{cnt2} = temptable.IntDen(temptable.Ch==ch1);
+                if(max(ismember(temptable.Ch, ch2)));   intDenWhole_ch2{cnt2} = temptable.IntDen(temptable.Ch==ch2);
+                else;                                   intDenWhole_ch2{cnt2} = zeros(length(nonzeros(temptable.Ch==ch1)),1); end
+                if(max(ismember(temptable.Ch, ch3)));   intDenWhole_ch3{cnt2} = temptable.IntDen(temptable.Ch==ch3);
+                else;                                   intDenWhole_ch3{cnt2} = zeros(length(nonzeros(temptable.Ch==ch1)),1); end
+                if(max(ismember(temptable.Ch, ch4)));   intDenWhole_ch4{cnt2} = temptable.IntDen(temptable.Ch==ch4);
+                else;                                   intDenWhole_ch4{cnt2} = zeros(length(nonzeros(temptable.Ch==ch1)),1); end
+
                 %Store Area
-                areaWhole_ch1{cnt2} = temptable.Area(temptable.Ch==ch1);
-                areaWhole_ch2{cnt2} = temptable.Area(temptable.Ch==ch2);
-                areaWhole_ch3{cnt2} = temptable.Area(temptable.Ch==ch3);
-                areaWhole_ch4{cnt2} = temptable.Area(temptable.Ch==ch4);
-                
-                %Empty Variables:
-                [intDenNuc_ch1{cnt2}, intDenNuc_ch2{cnt2}, ...
+                                                        areaWhole_ch1{cnt2} = temptable.Area(temptable.Ch==ch1);
+                if(max(ismember(temptable.Ch, ch2)));   areaWhole_ch2{cnt2} = temptable.Area(temptable.Ch==ch2);
+                else;                                   areaWhole_ch2{cnt2} = zeros(length(nonzeros(temptable.Ch==ch1)),1); end
+                if(max(ismember(temptable.Ch, ch3)));   areaWhole_ch3{cnt2} = temptable.Area(temptable.Ch==ch3);
+                else;                                   areaWhole_ch3{cnt2} = zeros(length(nonzeros(temptable.Ch==ch1)),1); end
+                if(max(ismember(temptable.Ch, ch4)));   areaWhole_ch4{cnt2} = temptable.Area(temptable.Ch==ch4);
+                else;                                   areaWhole_ch4{cnt2} = zeros(length(nonzeros(temptable.Ch==ch1)),1); end
+
+                if inputs.ROImatching
+                    templist        = temptable.Label(temptable.Ch==ch1);
+                    ROIcytIdx1      = cell2mat(strfind(templist(1), 'tif:'))+4;
+                    ROIcytIdx2      = length(templist{1}) - cell2mat(strfind(templist(1), 'c:'))+2;         %Measure name from end since ROI numbers can have variable length
+                    templist2       = cellfun(@(x) x(ROIcytIdx1:end-ROIcytIdx2), templist, 'UniformOutput', 0);
+                    templist3       = cleanNames(templist2, '-');
+                    ROIcyt{cnt2}    = str2double(cleanNames(templist3, '-'))';
+
+                end
+
+                %Empty variables if no nuclear mask is selected:
+                if ~inputs.nucMaskFlag
+                [   intDenNuc_ch1{cnt2}, intDenNuc_ch2{cnt2}, ...
                     intDenNuc_ch3{cnt2}, intDenNuc_ch4{cnt2}, ...
                     areaNuc_ch1{cnt2},   areaNuc_ch2{cnt2}, ...
                     areaNuc_ch3{cnt2},   areaNuc_ch4{cnt2}, ...
-                    ] = deal([]);
-                
+                    ] = deal(zeros(size(areaWhole_ch1{cnt2})));
+                end
                 cnt2 = cnt2+1;
         end
+        clear templist templist2 templist3 ROIcytIdx ROInucIdx
     end
     clear cnt1 cnt2
     
     
+%Match nuclear and cyt ROIs based on their names, only if both checkboxes in the GUI are ON    
+if inputs.nucMaskFlag && inputs.cytMaskFlag 
+
+    [intDenWhole_ch1,intDenWhole_ch2,intDenWhole_ch3,intDenWhole_ch4,...
+       intDenNuc_ch1,  intDenNuc_ch2,  intDenNuc_ch3,  intDenNuc_ch4,...
+       areaWhole_ch1,  areaWhole_ch2,  areaWhole_ch3,  areaWhole_ch4,...
+         areaNuc_ch1,    areaNuc_ch2,    areaNuc_ch3,    areaNuc_ch4]= ROImatcher(ROIcyt, ROInuc,...
+     intDenWhole_ch1,intDenWhole_ch2,intDenWhole_ch3,intDenWhole_ch4,...
+       intDenNuc_ch1,  intDenNuc_ch2,  intDenNuc_ch3,  intDenNuc_ch4,...
+       areaWhole_ch1,  areaWhole_ch2,  areaWhole_ch3,  areaWhole_ch4,...
+         areaNuc_ch1,    areaNuc_ch2,    areaNuc_ch3,    areaNuc_ch4);
+end
+
     %Concat. everything from loop
     totIntWhole_1 = cell2mat(intDenWhole_ch1');
     totIntWhole_2 = cell2mat(intDenWhole_ch2');
     totIntWhole_3 = cell2mat(intDenWhole_ch3');
     totIntWhole_4 = cell2mat(intDenWhole_ch4');
-    
+
     totAreaWhole_1 = cell2mat(areaWhole_ch1');
     totAreaWhole_2 = cell2mat(areaWhole_ch2');
     totAreaWhole_3 = cell2mat(areaWhole_ch3');
@@ -144,20 +187,17 @@ for ctr2 = 1:length(file.treatmentfold)
     totAreaNuc_3 = cell2mat(areaNuc_ch3');
     totAreaNuc_4 = cell2mat(areaNuc_ch4');
     
-    try
+    
     %Estimating Cytoplasm:
     totIntCyt_1 = totIntWhole_1-totIntNuc_1;
     totIntCyt_2 = totIntWhole_2-totIntNuc_2;
     totIntCyt_3 = totIntWhole_3-totIntNuc_3;
     totIntCyt_4 = totIntWhole_4-totIntNuc_4;
-    catch
-        keyboard
-    end
+
     totAreaCyt_1 = totAreaWhole_1-totAreaNuc_1;
     totAreaCyt_2 = totAreaWhole_2-totAreaNuc_2;
     totAreaCyt_3 = totAreaWhole_3-totAreaNuc_3;
     totAreaCyt_4 = totAreaWhole_4-totAreaNuc_4;
-    
     
     %Calculating Means:
     meanNuc_1 = totIntNuc_1./totAreaNuc_1;
@@ -238,10 +278,12 @@ for ctr2 = 1:length(file.treatmentfold)
     resvec_calc4{5,ctr2} = meanRatio_4./1;
     
     %Ratios:
+    if inputs.nucMaskFlag
     resvec_ratio{1, ctr2} = xChanPositiveRat';
     resvec_ratio{3, ctr2} = yChanPositiveRat';
     resvec_ratio{2, ctr2} = doublePositiveRat';
     resvec_ratio{4, ctr2} = doubleNegativeRat';
+    end
     
     %BackupCalcs
     resvec_another{1, ctr2} = [meanNuc_1; meanNuc_2; meanNuc_3; meanNuc_4];
@@ -261,7 +303,8 @@ for ctr2 = 1:length(file.treatmentfold)
         areaNuc_ch1    areaNuc_ch2     areaNuc_ch3     areaNuc_ch4 ...
         intDenWhole_ch1 intDenWhole_ch2 intDenWhole_ch3 intDenWhole_ch4 ...
         areaWhole_ch1  areaWhole_ch2   areaWhole_ch3    areaWhole_ch4 ...
-        xChanPositiveRat    yChanPositiveRat    doublePositiveRat   doubleNegativeRat
+        xChanPositiveRat    yChanPositiveRat    doublePositiveRat   doubleNegativeRat ...
+        ROIcyt  ROInuc
 end
 
 %% |----------- NORMALIZATION ------------|
@@ -348,7 +391,7 @@ if outputs.boxplot==1
         resvec_ch2 = norm_resvec_calc2;
         resvec_ch3 = norm_resvec_calc3;
         resvec_ch4 = norm_resvec_calc4;
-        
+
     else
         resvec_ch1 = resvec_calc1;
         resvec_ch2 = resvec_calc2;
