@@ -200,7 +200,11 @@ end
     totAreaCyt_4 = totAreaWhole_4-totAreaNuc_4;
     
     
-   
+    %Dropping negative cytoplasm values (i.e. missegmentation):
+    keyboard
+    negFind1 = find(totIntCyt_1<0)
+    negFind4 = find(totIntCyt_4<0)
+    
     %Calculating Means:
     meanNuc_1 = totIntNuc_1./totAreaNuc_1;
     meanNuc_2 = totIntNuc_2./totAreaNuc_2;
@@ -311,8 +315,8 @@ end
 
 %% |----------- NORMALIZATION ------------|
 if calcs.normFlag
-    currResvecData = resvec_calc3;
-    msgbox('Normalizing data to channel 3 calcs - edit manually in script')
+    currResvecData = resvec_calc4;
+    msgbox('Normalizing data to channel 4 calcs - edit manually in script')
     
     switch calcs.normType
         case 'Max'

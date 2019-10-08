@@ -548,11 +548,12 @@ end
 
 calclist = [calclist];
 
+%01.10.2019 - calcs.all uses a number code to encode 3d data (channel, treatment, and calculation type)
 handles.calcs.nuc      (find(calclist==1)) = 1;  %This can be re-written to be quicker!
-handles.calcs.cyt      (find(calclist==2)) = 1;
-handles.calcs.wholeCell(find(calclist==3)) = 1;
-handles.calcs.ncRatio  (find(calclist==4)) = 1;
-handles.calcs.cnRatio  (find(calclist==5)) = 1;
+handles.calcs.cyt      (find(calclist==2)) = 2;
+handles.calcs.wholeCell(find(calclist==3)) = 3;
+handles.calcs.ncRatio  (find(calclist==4)) = 4;
+handles.calcs.cnRatio  (find(calclist==5)) = 5;
 
 %Edit this variable if you want multiple calculations in the same channel:
 handles.calcs.all = [handles.calcs.nuc; handles.calcs.cyt; ...

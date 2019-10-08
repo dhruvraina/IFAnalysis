@@ -318,14 +318,12 @@ switch plotflag.type
         close gcf
         
          fileID = fopen([file.outpath file.slashtype file.experimentName '_Reformat.txt'],'w');
-         fprintf(fileID, '%1$s\t %2$s\t %3$s\t %4$s\t %5$s\t %6$s\t %7$s\r\n', 'Treatment', 'Mean', 'St.Dev', 'Channel', 'Measurement','Number of Cells', 'Experiment');
+         fprintf(fileID, '%1$s\t %2$s\t %3$s\t %4$s\t %5$s\t %6$s\r\n', 'Treatment', 'Mean', 'St.Dev', 'Channel', 'Measurement', 'Experiment');
          
          for tnum = 1:size(pathlist_labels,2)
              fprintf(fileID,'%1$s\t', pathlist_labels{tnum});
              fprintf(fileID,'%4.2f\t %4.2f\t', lims.boxmean(tnum), lims.boxStd(tnum));
              fprintf(fileID, '%1$s\t', ChannelLabel);
-             fprintf(fileID, '%1$s\t', calclbl);
-             fprintf(fileID, '%1$s\t', num2str(length(resvec{tnum})));
              fprintf(fileID, '%1$s\r\n', file.experimentName);
          end
 
