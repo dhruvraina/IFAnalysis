@@ -412,7 +412,7 @@ if outputs.boxplot==1
     if ~isempty(activeChans)
         
         %Inputs for IF_ncplot.m
-        plotflag.type = 'boxplot2'                                         %boxplot1 is the basic NotBoxPlot;
+        plotflag.type = 'violin'; %'boxplot2'                              %boxplot1 is the basic NotBoxPlot;
         scatx = 0;                                                         %boxplot2 is the UnivarScatter plot;
         scaty = 0;
         scatz = 0;
@@ -498,6 +498,7 @@ if outputs.chanscat ==1
     ycalcType = find(calcs.all(:,ychan));
     
     plotflag.type      = 'SingleScatter';
+    plotflag.logscale  = 1;  %Set log scale plots on or off
     plotflag.corrprint = outputs.CorrLine;
     
     chlabel{1,1} = inputs.ChannelLabel{xchan};

@@ -8,7 +8,7 @@ function IF_ncplot(plotflag, resvec, scatx, scaty, scatz, pathlist_labels, Chann
 %Using Brewermap
 colors = brewermap(length(file.treatmentLabels), 'Spectral');  %'Set2'
 addpath([file.codeparent file.slashtype 'ExchangeTools']);
-
+addpath([file.outpath file.slashtype]);
 %Using UniformPercepCols from matplotlib
 %col1   = viridis();
 col1   = magma();
@@ -51,16 +51,23 @@ switch plotflag.type
             scatter(scatx, scaty, 'filled', ...
                 'MarkerFaceColor', colors(treatmentNo,:), ...
                 'MarkerFaceAlpha',3/7)
+        
+        if plotflag.logscale
+            set(gca, 'xscale', 'log')
+            set(gca, 'yscale', 'log')
+            hold on
+            logOffst = 1; %plotting 0 on log axis doesn't work, thresholds don't show.
+        end
+            
         %Setting the cutoff lines
         if calcs.Ratios
             hold on
-            plot([1 1].*calcs.XAxisThresh, lims.y, '--k')
-            plot(lims.x, [1 1].*calcs.YAxisThresh, '--k')
+            plot([1 1].*calcs.XAxisThresh, lims.y+logOffst, '--k')
+            plot(lims.x+logOffst, [1 1].*calcs.YAxisThresh, '--k')
         end
         
         end
         
-       
         xlim(lims.x)
         ylim(lims.y)
         xlabel([ChannelLabel{1,1} ' ' ChannelLabel{2,1} ' Intensity (a.u.)'])
@@ -81,10 +88,23 @@ switch plotflag.type
             annotation('textbox',dim,'String',plotstrg,'FitBoxToText','on');
         end
         
-        set(gca,'FontSize', 14)
+        %Load figure props for different projects:
+        ff.fontSize      = 14;
+        ff.PaperPosition = [0 0 10 10];
+        ff.PaperUnits    = 'inches';
+        ff.pointSize     = 200;
+        addProps = 0;
+        if addProps
+            ff = figprops; %Potentially save various properties as a function in the outpath
+        end
+        %get markersize handles and adjust
+        handleMarker = findall(gca, 'marker', 'o');
+        set(handleMarker, 'sizedata', ff.pointSize);
+        
+        set(gca,'FontSize', ff.fontSize)
         set(gca, 'TickDir', 'out');
-        fig1.PaperUnits    = 'inches';
-        fig1.PaperPosition = [0 0 10 10];
+        set(gcf, 'Units', ff.PaperUnits, 'Position', ff.PaperPosition);
+       
         
         if ~isdir([file.outpath file.slashtype 'Scatter'])
             mkdir([file.outpath file.slashtype 'Scatter']);
@@ -329,8 +349,63 @@ switch plotflag.type
              fprintf(fileID, '%1$s\r\n', file.experimentName);
          end
 
+        % --------------  E. Violin Plots  -----------------------: 
+    case('violin')
+        %unpack resvec
+        tempvec = cellfun(@(x) x(:,1), resvec, 'UniformOutput', 0);
+        
+        %Make an empty matrix with nans
+        maxLength   = max(cell2mat(cellfun(@(x) length(x), resvec, 'UniformOutput', 0)));
+        nTreatments = size(resvec,2);
+        
+        %Colors:
+        for nn = 1:nTreatments
+            colCell{nn} = colors(nn,:);
+        end
+        
+        figN = figure
+        violinPlot(tempvec,'addSpread',true,'showMM',6, 'color', colCell); 
+        violinPlot(tempvec,'xyOri','flipped','histOri','right','showMM',6),
 
-        % --------------  E. Stacked Bar Plot for Ratios  --------:        
+        %Set markerSize in plotSpread.m
+        %Set Quartile Markers size in violinPlots.m
+        
+        figWide = nTreatments*2.3;
+        figTall = 7;
+        
+        ylabel('Mean Intensity')
+        title(['Mean ' char(ChannelLabel) ' ' calclbl ' Intensity Per Cell'])
+        
+        ylim([lims.boxmin lims.boxmax])
+        figN.PaperUnits    = 'inches';
+        figN.PaperPosition =  [0 0 figWide figTall];
+        
+      %Mean Annotations:
+        for cc2 = 1:nTreatments
+           labels_stacked = num2str(floor(lims.boxmean(cc2).*10)./10);
+           hText          = text(cc2, lims.maxLabel(cc2), labels_stacked);
+           set(hText,'VerticalAlignment', 'bottom', 'HorizontalAlignment', 'center','FontSize',14);
+        end
+
+        set(gca, 'TickDir', 'out');
+        set(gca,'FontSize', 14)
+        set(gca, 'XTickLabel', pathlist_labels);
+
+        if ~isdir([file.outpath file.slashtype 'BoxPlot2'])
+            mkdir([file.outpath file.slashtype 'BoxPlot2']);
+        end
+        
+        switch plotflag.imageFormat
+            case 'svg'
+                print(figN,[file.outpath file.slashtype 'BoxPlot2' file.slashtype 'viol_'  calclbl '_' ChannelLabel], '-painters', '-dsvg','-r200')
+            case 'png'
+                print(figN,[file.outpath file.slashtype 'BoxPlot2' file.slashtype 'viol_'  calclbl '_' ChannelLabel], '-painters', '-dpng','-r200')
+        end
+        close gcf
+        
+               
+        
+        % --------------  F. Stacked Bar Plot for Ratios  --------:        
     case('stacked')
         %Redfining ChannelLabel as a struct for the stacked bar plots since they
         %require a different order of the data.

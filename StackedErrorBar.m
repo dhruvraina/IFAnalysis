@@ -3,13 +3,13 @@
 clear all; close all;                                                      %#ok<CLALL>
 
 %User Inputs
-inputTxtFile         = '/Users/draina/Desktop/E11_Communifate/DifferentClones/Consolidated/AllExperiments.txt'; 
+inputTxtFile         = '/Users/draina/Desktop/E11_Communifate/InductionTimes/Consolidated - logThresholds/C6_FateRatios_logThreshConsolidated.txt'; 
 Consolidated         = readtable(inputTxtFile, 'Delimiter', 'tab','Format', '%s%f%f%f%f%f%s' );
-file.outpath         = '/Users/draina/Desktop/';
+file.outpath         = '/Users/draina/Desktop/E11_Communifate/InductionTimes/Consolidated - logThresholds/';
 file.slashtype       = '/';
-file.experimentName  = '190625_DifferentClones';
+file.experimentName  = '191103logThresh';
 plotflag.imageFormat = 'svg';
-printNumbers         = 0; %Print values inside graph
+printNumbers         = 1; %Print values inside graph
 minStringLenMatch    = 4; %Match first 4 characters from the Treatment Name
 barTall              = 10; 
 textSize             = 22;
