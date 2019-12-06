@@ -1,4 +1,5 @@
 %Plots stacked bars for fate decision experiments including error bars
+
 clear all; close all;                                                      %#ok<CLALL>
 
 %User Inputs
@@ -8,14 +9,15 @@ file.outpath         = '/Users/draina/Desktop/E11_Communifate/DifferentClones/Co
 file.slashtype       = '/';
 file.experimentName  = '191205_DiffClones_InclFGF';
 plotflag.imageFormat = 'svg';
-printNumbers         = 0;     %Print values inside graph
+printNumbers         = 0;    %Print values inside graph
 minStringLenMatch    = 5;     %Match first x characters from the Treatment Name
-barTall              = 10;    %Height of plot
+barTall              = 10;
 confidenceInterval   = 1.96;  %1.96*sigma for 95%, 2*sigma  for 95.45%
-ylimAuto             = 1;     %Overrides ylims below if ON
+ylimAuto             = 1;
 ylim1                = 0;
 ylim2                = 100;
 textSize             = 12;
+nTreatments          = length(TreatmentList);
 
 %Main:
 file.codeparent         = cd;
@@ -25,8 +27,6 @@ addpath([file.codeparent file.slashtype 'ExchangeTools']);
 
 ExperimentList = unique(Consolidated.Experiment, 'stable');
 TreatmentList  = unique(Consolidated.Treatment,  'stable');
-nTreatments    = length(TreatmentList);
-
 
 %Find shortest name in TreatmentList for strmatch operations:
 %[minStringLen, id] = min(cellfun(@(x) length(x), TreatmentList));
@@ -64,13 +64,14 @@ hold on
 
 %Set Properties
 set(gca, 'XTick', 1:length(TreatmentList), 'XTickLabels', TreatmentList)
-barWide = length(TreatmentList)*2; %Scale plot width
+%barTall = 20;
+barWide = length(TreatmentList)*2;
 xName   = '';
 yName   = 'Fraction';
 
 % Print text labels inside the bar graph
 if printNumbers
-    for i=1:size(resvec,1)                                                 %#ok<UNRCH>
+    for i=1:size(resvec,1)                                                      %#ok<UNRCH>
         for j=1:size(resvec,2)
             if resvec(i,j)>0.06                                          %Don't print values less than x% due to label space constraints
                 labels_stacked = num2str((floor(resvec(i,j)*100))/100);  %Round digits to nearest lower full percent
@@ -100,7 +101,7 @@ errbar(errXid, cumsum(resvec,2),stderr, zeros(size(stderr)), 'k+-','linewidth', 
 %Save + additional props:
 xlabel(xName)
 ylabel(yName)
-title([cleanNames({file.experimentName},'_') '(std. Err)'])
+title([file.experimentName '(std. Err)'])
 
 if ~ylimAuto;       ylim([ylim1 ylim2]);           end
 

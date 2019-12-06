@@ -7,8 +7,8 @@
 function IF_ncplot(plotflag, resvec, scatx, scaty, scatz, pathlist_labels, ChannelLabel, calclbl, file, lims, calcs)
 %Using Brewermap
 colors = brewermap(length(file.treatmentLabels), 'Spectral');  %'Set2'
-addpath([file.codeparent file.slashtype 'ExchangeTools']);
-addpath([file.outpath file.slashtype]);
+addpath(genpath([file.codeparent file.slashtype 'ExchangeTools']));
+addpath([file.outpath file.slashtype]);  %?? What was I doing here?
 %Using UniformPercepCols from matplotlib
 %col1   = viridis();
 col1   = magma();
@@ -230,9 +230,6 @@ switch plotflag.type
             case 'fig'
                 savefig(fig1, [file.outpath file.slashtype 'Con_Scatter' file.slashtype 'ConScat'])
         end
-        
-               
-        
         close gcf
         
         
@@ -349,6 +346,9 @@ switch plotflag.type
              fprintf(fileID, '%1$s\r\n', file.experimentName);
          end
 
+         
+         
+         
         % --------------  E. Violin Plots  -----------------------: 
     case('violin')
         %unpack resvec
@@ -365,7 +365,9 @@ switch plotflag.type
         
         figN = figure
         violinPlot(tempvec,'addSpread',true,'showMM',6, 'color', colCell); 
-        violinPlot(tempvec,'xyOri','flipped','histOri','right','showMM',6),
+        
+        %can also do simple distributions!
+        %violinPlot(tempvec,'xyOri','flipped','histOri','right','showMM',6);
 
         %Set markerSize in plotSpread.m
         %Set Quartile Markers size in violinPlots.m
@@ -403,22 +405,23 @@ switch plotflag.type
         end
         close gcf
         
-               
+         
+        
         
         % --------------  F. Stacked Bar Plot for Ratios  --------:        
     case('stacked')
-        %Redfining ChannelLabel as a struct for the stacked bar plots since they
-        %require a different order of the data.
-        resvec = resvec';
-        fig2 = figure
+        %Redfining ChannelLabel as a struct for the stacked bar plots since they require a different order of the data.
+        resvec  = resvec';
+        fig2    = figure
         barWide = 10;
         barTall = 10;
         horzBar = 0;
         vertBar = 1;
         
+        %h is just the handle for the bars, not the figure handle
         %Horizontal Bar:
         if horzBar
-            h = barh(resvec, 0.9, 'stacked')
+            h       = barh(resvec, 0.9, 'stacked')
             set(gca, 'YTick', 1:length(pathlist_labels), 'YTickLabels', pathlist_labels)
             barTall = length(pathlist_labels)*2;
             xName   = 'Fraction';
@@ -473,7 +476,7 @@ switch plotflag.type
         ylabel(yName)
         title(ChannelLabel.title)
         
-        fig2.PaperUnits = 'inches';
+        fig2.PaperUnits    = 'inches';
         fig2.PaperPosition = [0 0 barWide barTall];
         set(gca,'FontSize', 14)
         if ~isdir([file.outpath file.slashtype 'StackedBar'])
@@ -496,9 +499,6 @@ switch plotflag.type
         end
         fprintf(fileID, '%1$s\t', ChannelLabel.title);
         fprintf(fileID,'%5.4f\t %5.4f\t %5.4f\t %5.4f\r\n', zeros(1, 4));
-            
-
-    
         close gcf
         
         
