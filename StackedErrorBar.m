@@ -1,12 +1,14 @@
 %Plots stacked bars for fate decision experiments including error bars
 clear all; close all;                                                      %#ok<CLALL>
+addpath('/Users/draina/Documents/Code/MATLAB/DhruvTools/');
+
 
 %User Inputs
 inputTxtFile         = '/Users/draina/Desktop/E11_Communifate/DifferentClones/Consolidated/logThresh/AllExperiments_InclFGF4.txt';
 Consolidated         = readtable(inputTxtFile, 'Delimiter', 'tab','Format', '%s%f%f%f%f%f%s' );
 file.outpath         = '/Users/draina/Desktop/E11_Communifate/DifferentClones/Consolidated/logThresh';
 file.slashtype       = '/';
-file.experimentName  = '191205_DiffClones_InclFGF';
+file.experimentName  = '191212_ReDo';
 plotflag.imageFormat = 'svg';
 printNumbers         = 0;     %Print values inside graph
 minStringLenMatch    = 5;     %Match first x characters from the Treatment Name
@@ -107,21 +109,32 @@ if ~ylimAuto;       ylim([ylim1 ylim2]);           end
 fig2.PaperUnits    = 'inches';
 fig2.PaperPosition = [0 0 barWide barTall];
 set(gca,'FontSize', textSize)
+set(gca,'TickDir', 'out')
 if ~isdir([file.outpath file.slashtype 'StackedBar'])
     mkdir([file.outpath file.slashtype 'StackedBar']);
 end
 
 
-%Write values to file:
+%Write means to file:
 fileID = fopen([file.outpath file.slashtype file.experimentName '_Reformat.txt'],'w');
 fprintf(fileID, '%1$s\t %2$s\t %3$s\t %4$s\t %5$s\r\n', 'Treatment', 'Mean GATA6Pos', 'Mean DP', 'Mean NANOGPos', 'Mean DN');
 
 for tnum = 1:nTreatments
     fprintf(fileID,'%1$s\t', TreatmentList{tnum});
-    fprintf(fileID,'%4.2f\t %4.2f\t %4.2f\t %4.2f\r\n', resvec(tnum,1), resvec(tnum,2), resvec(tnum,3), resvec(tnum,4));
+    fprintf(fileID,'%4.3f\t %4.3f\t %4.3f\t %4.3f\r\n', resvec(tnum,1), resvec(tnum,2), resvec(tnum,3), resvec(tnum,4));
+end
+
+%Write st.err to file:
+fileID = fopen([file.outpath file.slashtype file.experimentName '_stErr.txt'],'w');
+fprintf(fileID, '%1$s\t %2$s\t %3$s\t %4$s\t %5$s\r\n', 'Treatment', 'stdErr GATA6Pos', 'stdErr DP', 'stdErr NANOGPos', 'stdErr DN');
+
+for tnum = 1:nTreatments
+    fprintf(fileID,'%1$s\t', TreatmentList{tnum});
+    fprintf(fileID,'%4.3f\t %4.3f\t %4.3f\t %4.3f\r\n', stderr(tnum,1), stderr(tnum,2), stderr(tnum,3), stderr(tnum,4));
 end
 
 
+%Print graphs
 switch plotflag.imageFormat
     case 'svg'
         print(fig2,[file.outpath file.slashtype 'StackedBar' file.slashtype file.experimentName], '-painters', '-dsvg','-r200')

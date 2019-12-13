@@ -498,7 +498,7 @@ if outputs.chanscat ==1
     ycalcType = find(calcs.all(:,ychan));
     
     plotflag.type      = 'SingleScatter';
-    plotflag.logscale  = 1;  %Set log scale plots on or off
+    plotflag.logscale  = 0;  %Set log scale plots on or off
     plotflag.corrprint = outputs.CorrLine;
     
     chlabel{1,1} = inputs.ChannelLabel{xchan};

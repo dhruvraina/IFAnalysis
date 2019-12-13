@@ -10,8 +10,8 @@ colors = brewermap(length(file.treatmentLabels), 'Spectral');  %'Set2'
 addpath(genpath([file.codeparent file.slashtype 'ExchangeTools']));
 addpath([file.outpath file.slashtype]);  %?? What was I doing here?
 %Using UniformPercepCols from matplotlib
-%col1   = viridis();
-col1   = magma();
+col1   = viridis();
+%col1   = magma();
 col2   = floor(length(col1)/length(file.treatmentLabels));
 colors = flipud(col1(1:col2:end,:));
 
