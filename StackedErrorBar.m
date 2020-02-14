@@ -4,12 +4,12 @@ addpath('/Users/draina/Documents/Code/MATLAB/DhruvTools/');
 
 
 %User Inputs
-inputTxtFile         = '/Users/draina/Desktop/E11_Communifate/DifferentClones/Consolidated/logThresh/AllExperiments_InclFGF4.txt';
+inputTxtFile         = '/Users/draina/Desktop/E11_Communifate/densityVolume/C6_Fate_density_190515_Azra.txt';
 Consolidated         = readtable(inputTxtFile, 'Delimiter', 'tab','Format', '%s%f%f%f%f%f%s' );
-file.outpath         = '/Users/draina/Desktop/E11_Communifate/DifferentClones/Consolidated/logThresh';
+file.outpath         = '/Users/draina/Desktop/E11_Communifate/densityVolume';
 file.slashtype       = '/';
-file.experimentName  = '191212_ReDo';
-plotflag.imageFormat = 'svg';
+file.experimentName  = '200207';
+plotflag.imageFormat = 'png';
 printNumbers         = 0;     %Print values inside graph
 minStringLenMatch    = 5;     %Match first x characters from the Treatment Name
 barTall              = 10;    %Height of plot

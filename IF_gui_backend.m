@@ -167,25 +167,35 @@ if inputs.nucMaskFlag && inputs.cytMaskFlag
 end
 
     %Concat. everything from loop
-    totIntWhole_1 = cell2mat(intDenWhole_ch1');
-    totIntWhole_2 = cell2mat(intDenWhole_ch2');
-    totIntWhole_3 = cell2mat(intDenWhole_ch3');
-    totIntWhole_4 = cell2mat(intDenWhole_ch4');
-
     totAreaWhole_1 = cell2mat(areaWhole_ch1');
     totAreaWhole_2 = cell2mat(areaWhole_ch2');
     totAreaWhole_3 = cell2mat(areaWhole_ch3');
     totAreaWhole_4 = cell2mat(areaWhole_ch4');
     
+    totAreaNuc_1 = cell2mat(areaNuc_ch1');
+    totAreaNuc_2 = cell2mat(areaNuc_ch2');
+    totAreaNuc_3 = cell2mat(areaNuc_ch3');
+    totAreaNuc_4 = cell2mat(areaNuc_ch4');
+    
+    totIntWhole_1 = cell2mat(intDenWhole_ch1');
+    totIntWhole_2 = cell2mat(intDenWhole_ch2');
+    totIntWhole_3 = cell2mat(intDenWhole_ch3');
+    totIntWhole_4 = cell2mat(intDenWhole_ch4');
+
     totIntNuc_1 = cell2mat(intDenNuc_ch1');
     totIntNuc_2 = cell2mat(intDenNuc_ch2');
     totIntNuc_3 = cell2mat(intDenNuc_ch3');
     totIntNuc_4 = cell2mat(intDenNuc_ch4');
     
-    totAreaNuc_1 = cell2mat(areaNuc_ch1');
-    totAreaNuc_2 = cell2mat(areaNuc_ch2');
-    totAreaNuc_3 = cell2mat(areaNuc_ch3');
-    totAreaNuc_4 = cell2mat(areaNuc_ch4');
+    
+    %delete entries in ch4 where cyt<nuc Add More Channels here, I'm lazy
+    %right now so won't do it
+    cleartmp = find((totAreaWhole_4-totAreaNuc_4)<10);
+
+    totIntWhole_4(cleartmp)  = [];
+    totAreaNuc_4(cleartmp)   = [];
+    totAreaWhole_4(cleartmp) = [];
+    totIntNuc_4(cleartmp)    = [];
     
     
     %Estimating Cytoplasm:
@@ -391,7 +401,6 @@ end
 %% --------------  A. Boxplots  --------:
 
 if outputs.boxplot==1
-    
     %Swap save variables during normalization:
     if calcs.normFlag
         resvec_ch1 = norm_resvec_calc1;
@@ -412,9 +421,9 @@ if outputs.boxplot==1
     if ~isempty(activeChans)
         
         %Inputs for IF_ncplot.m
-        plotflag.type = 'violin'; %'boxplot2'                              %boxplot1 is the basic NotBoxPlot;
+        plotflag.type = 'boxplot';%'violin'; %'boxplot2'                   %boxplot1 is the basic NotBoxPlot;
         scatx = 0;                                                         %boxplot2 is the UnivarScatter plot;
-        scaty = 0;
+        scaty = 0;                                                         %violin is from violinplot.m
         scatz = 0;
         
         for cc = activeChans                                               %Channels - in columns
@@ -451,9 +460,12 @@ if outputs.boxplot==1
                         lims.boxmax = outputs.boxYlim(2);
                     end
                     
+              plotflag.writeStats = 1;    %save stats to file
                     lims.boxStd   = cellfun(@(x) std(x(:,1)), resvec);
                     lims.maxLabel = cellfun(@(x) max(x(:,1)), resvec); 
                     lims.boxmean  = cellfun(@(x) mean(x(:,1)), resvec); %mainly for printing
+                    lims.boxCV    = lims.boxStd./lims.boxmean;
+                    
                     chlabel       = inputs.ChannelLabel{cc};
                     calclbl2      = calcs.label{cc};
                     IF_ncplot(plotflag, resvec,scatx, scaty, scatz, treatmentLabels, chlabel, calclbl2, file, lims, calcs)
@@ -498,7 +510,7 @@ if outputs.chanscat ==1
     ycalcType = find(calcs.all(:,ychan));
     
     plotflag.type      = 'SingleScatter';
-    plotflag.logscale  = 0;  %Set log scale plots on or off
+    plotflag.logscale  = 1;  %Set log scale plots on or off
     plotflag.corrprint = outputs.CorrLine;
     
     chlabel{1,1} = inputs.ChannelLabel{xchan};

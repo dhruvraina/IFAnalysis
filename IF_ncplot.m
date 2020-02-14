@@ -236,7 +236,38 @@ switch plotflag.type
         
         
         % --------------  C. Boxplot - notBoxPlot  --------:
-    case ('boxplot1')
+        
+    case ('boxplot')
+         %Hard coded because I don't agree with doing things this way:
+        tvec = padcat(resvec{1}(:,1), resvec{2}(:,1)); %, resvec{3}(:,1), resvec{4}(:,1), resvec{5}(:,1));
+        datapt = {resvec{1}(:,1), resvec{2}(:,1)}; %, resvec{3}(:,1), resvec{4}(:,1), resvec{5}(:,1)};
+        fig2 = figure, plotSpread(datapt, 'distributionColors', colors(1:2,:))   
+        hold on
+        boxplot(tvec)
+        
+        set(gca, 'XTickLabel', pathlist_labels)
+        title(['Mean ' char(ChannelLabel) ' ' calclbl ' Intensity Per Cell'])
+        ylabel('Mean Intensity')
+        
+        ylim([lims.boxmin lims.boxmax])
+        fig2.PaperUnits    = 'inches';
+        fig2.PaperPosition = [0 0 4 8];
+        
+        set(gca, 'TickDir', 'out');
+        set(gca,'FontSize', 14)
+        if ~isdir([file.outpath file.slashtype 'BoxPlotStandard'])
+            mkdir([file.outpath file.slashtype 'BoxPlotStandard']);
+        end
+        
+        switch plotflag.imageFormat
+            case 'svg'
+                print(fig2,[file.outpath file.slashtype 'BoxPlotStandard' file.slashtype 'box_' calclbl '_' ChannelLabel], '-painters', '-dsvg','-r200')
+            case'png'
+                print(fig2,[file.outpath file.slashtype 'BoxPlotStandard' file.slashtype 'box_' calclbl '_' ChannelLabel], '-painters', '-dpng','-r200')
+        end
+        close gcf
+    
+    case ('notboxplot')
         %Unpack resvec
         for ctr1 = 1:length(resvec)
             resvec{1,ctr1}(:,2) = ctr1;
@@ -363,15 +394,12 @@ switch plotflag.type
             colCell{nn} = colors(nn,:);
         end
         
-        figN = figure
-        violinPlot(tempvec,'addSpread',true,'showMM',6, 'color', colCell); 
+        figN     = figure
+        figNProp = violinPlot(tempvec,'addSpread',true,'showMM',6, 'color', colCell); %MM=6 is 25, 50, 75 percentile
         
         %can also do simple distributions!
         %violinPlot(tempvec,'xyOri','flipped','histOri','right','showMM',6);
 
-        %Set markerSize in plotSpread.m
-        %Set Quartile Markers size in violinPlots.m
-        
         figWide = nTreatments*2.3;
         figTall = 7;
         
@@ -392,7 +420,19 @@ switch plotflag.type
         set(gca, 'TickDir', 'out');
         set(gca,'FontSize', 14)
         set(gca, 'XTickLabel', pathlist_labels);
-
+        
+        %Marker Colour:
+        colMark = [224 17 95];    %Ruby markers for viridis
+        colMark = colMark./256;   %convert from rgb space to [0 1]
+        colMark(4) = 0.1;         %facealpha value, doesn't work because I didn't figure out how to use it just yet
+        
+        %Set Quartile Markers size in violinPlots.m
+        %Set markerSize in plotSpread.m, or can be addressed here:
+        %Setting marker size for ViolinPlots:
+        for jj = 1:nTreatments
+            set(figNProp{4}{1}(jj), 'MarkerSize', 6, 'color', 'b')
+        end
+        
         if ~isdir([file.outpath file.slashtype 'BoxPlot2'])
             mkdir([file.outpath file.slashtype 'BoxPlot2']);
         end
@@ -502,6 +542,21 @@ switch plotflag.type
         close gcf
         
         
+end
+
+if plotflag.writeStats
+         fileID = fopen([file.outpath file.slashtype file.experimentName '_Reformat.txt'],'w');
+         fprintf(fileID, '%1$s\t %2$s\t %3$s\t %4$s\t %5$s\t %6$s\t %7$s\t %8$s\r\n', 'Treatment', 'Mean', 'St.Dev','CV', 'Channel', 'Measurement','Number of Cells', 'Experiment');
+         
+         for tnum = 1:size(pathlist_labels,2)
+             fprintf(fileID,'%1$s\t', pathlist_labels{tnum});
+             fprintf(fileID,'%4.2f\t %4.2f\t %4.2f\t', lims.boxmean(tnum), lims.boxStd(tnum), lims.boxCV(tnum));
+             fprintf(fileID, '%1$s\t', ChannelLabel);
+             fprintf(fileID, '%1$s\t', calclbl);
+             fprintf(fileID, '%1$s\t', num2str(length(resvec{tnum})));
+             fprintf(fileID, '%1$s\r\n', file.experimentName);
+         end
+
 end
 end
 
