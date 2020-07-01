@@ -466,6 +466,7 @@ handles.inputs.activeChans   = [get(handles.rdbt_calcCh1, 'Value') ...
 
 handles.inputs.nucMaskFlag   = get(handles.chk_nucMaskPrefix, 'Value');
 handles.inputs.cytMaskFlag   = get(handles.chk_cytMaskPrefix, 'Value');
+handles.inputs.cellMaskFlag  = get(handles.chk_wholeCellMaskPrefix, 'Value');
 
 if handles.inputs.nucMaskFlag
     handles.inputs.nucMaskPrefix = get(handles.etx_nucmaskPrefix, 'String');
@@ -479,6 +480,11 @@ else
     handles.inputs.cytMaskPrefix = 'none'
 end
 
+if handles.inputs.cellMaskFlag
+    handles.inputs.cellMaskPrefix = get(handles.etx_cellMaskPrefix, 'String');
+else
+    handles.inputs.cellMaskPrefix = 'none'
+end
 
 
 %Outputs

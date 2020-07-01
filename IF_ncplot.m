@@ -239,9 +239,9 @@ switch plotflag.type
         
     case ('boxplot')
          %Hard coded because I don't agree with doing things this way:
-        tvec = padcat(resvec{1}(:,1), resvec{2}(:,1)); %, resvec{3}(:,1), resvec{4}(:,1), resvec{5}(:,1));
-        datapt = {resvec{1}(:,1), resvec{2}(:,1)}; %, resvec{3}(:,1), resvec{4}(:,1), resvec{5}(:,1)};
-        fig2 = figure, plotSpread(datapt, 'distributionColors', colors(1:2,:))   
+        tvec = padcat(resvec{1}(:,1), resvec{2}(:,1) , resvec{3}(:,1), resvec{4}(:,1), resvec{5}(:,1), resvec{6}(:,1));
+        datapt = {resvec{1}(:,1), resvec{2}(:,1) , resvec{3}(:,1), resvec{4}(:,1), resvec{5}(:,1), resvec{6}(:,1)};
+        fig2 = figure, plotSpread(datapt, 'distributionColors', colors(1:6,:))   
         hold on
         boxplot(tvec)
         
@@ -251,7 +251,7 @@ switch plotflag.type
         
         ylim([lims.boxmin lims.boxmax])
         fig2.PaperUnits    = 'inches';
-        fig2.PaperPosition = [0 0 4 8];
+        fig2.PaperPosition = [0 0 8 4];
         
         set(gca, 'TickDir', 'out');
         set(gca,'FontSize', 14)
@@ -550,7 +550,7 @@ if plotflag.writeStats
          
          for tnum = 1:size(pathlist_labels,2)
              fprintf(fileID,'%1$s\t', pathlist_labels{tnum});
-             fprintf(fileID,'%4.2f\t %4.2f\t %4.2f\t', lims.boxmean(tnum), lims.boxStd(tnum), lims.boxCV(tnum));
+             fprintf(fileID,'%4.2f\t %4.2f\t %4.2f\t %4.2f\t', lims.boxmean(tnum), lims.boxStd(tnum), lims.boxCV(tnum), lims.boxmed(tnum));
              fprintf(fileID, '%1$s\t', ChannelLabel);
              fprintf(fileID, '%1$s\t', calclbl);
              fprintf(fileID, '%1$s\t', num2str(length(resvec{tnum})));

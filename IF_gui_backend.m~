@@ -543,7 +543,7 @@ if outputs.boxplot==1
                     lims.boxStd   = cellfun(@(x) std(x(:,1)), resvec);
                     lims.maxLabel = cellfun(@(x) max(x(:,1)), resvec); 
                     lims.boxmean  = cellfun(@(x) mean(x(:,1)), resvec); %mainly for printing
-                    lims.boxmed   = cellfun(@(x) median(x(:,1)), resvec);
+                    lims.boxmed   = cellfun(@(x) median())
                     lims.boxCV    = lims.boxStd./lims.boxmean;
                     
                     chlabel       = inputs.ChannelLabel{cc};
