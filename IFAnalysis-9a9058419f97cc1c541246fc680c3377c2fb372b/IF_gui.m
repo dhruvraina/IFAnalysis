@@ -82,7 +82,7 @@ end
 handles.file.slashtype    = '/';
 handles.file.codepath     = cd;
 pfinder                   = strfind(handles.file.codepath, handles.file.slashtype);
-handles.file.codeparent   = handles.file.codepath(1:pfinder(end));
+handles.file.codeparent   = handles.file.codepath(1:pfinder(end-1)); %Edit for subfolder 
 
 set(handles.chk_nucMaskPrefix, 'Value', 1);
 set(handles.etx_ch1lbl, 'Enable', 'off');
@@ -92,14 +92,14 @@ set(handles.etx_ch4lbl, 'Enable', 'off');
 set(handles.etx_SetXThresh, 'Enable', 'off');
 set(handles.etx_SetYThresh, 'Enable', 'off');
 set(handles.rdbt_noNorm, 'Value', 1);
-handles.calcs.normFlag          = 0;
+handles.calcs.normFlag    = 0;
 
 %Add tools
-addpath([handles.file.codeparent handles.file.slashtype 'DhruvTools']);
-addpath([handles.file.codeparent handles.file.slashtype 'ExchangeTools']);
-addpath([handles.file.codeparent handles.file.slashtype 'ExchangeTools' handles.file.slashtype 'UnivarScatter_v1.1']);
-addpath([handles.file.codeparent handles.file.slashtype 'ExchangeTools' handles.file.slashtype 'DrosteEffect-BrewerMap-a77e675']);
-addpath([handles.file.codeparent handles.file.slashtype 'ExchangeTools' handles.file.slashtype 'raacampbell-notBoxPlot-2fbf98c' handles.file.slashtype 'code']);
+addpath([handles.file.codeparent 'DhruvTools']);
+addpath([handles.file.codeparent 'ExchangeTools']);
+addpath([handles.file.codeparent 'ExchangeTools' handles.file.slashtype 'UnivarScatter_v1.1']);
+addpath([handles.file.codeparent 'ExchangeTools' handles.file.slashtype 'DrosteEffect-BrewerMap-a77e675']);
+addpath([handles.file.codeparent 'ExchangeTools' handles.file.slashtype 'raacampbell-notBoxPlot-2fbf98c' handles.file.slashtype 'code']);
 
 
 % Update handles structure
@@ -466,7 +466,6 @@ handles.inputs.activeChans   = [get(handles.rdbt_calcCh1, 'Value') ...
 
 handles.inputs.nucMaskFlag   = get(handles.chk_nucMaskPrefix, 'Value');
 handles.inputs.cytMaskFlag   = get(handles.chk_cytMaskPrefix, 'Value');
-handles.inputs.cellMaskFlag  = get(handles.chk_wholeCellMaskPrefix, 'Value');
 
 if handles.inputs.nucMaskFlag
     handles.inputs.nucMaskPrefix = get(handles.etx_nucmaskPrefix, 'String');
@@ -480,11 +479,6 @@ else
     handles.inputs.cytMaskPrefix = 'none'
 end
 
-if handles.inputs.cellMaskFlag
-    handles.inputs.cellMaskPrefix = get(handles.etx_cellMaskPrefix, 'String');
-else
-    handles.inputs.cellMaskPrefix = 'none'
-end
 
 
 %Outputs

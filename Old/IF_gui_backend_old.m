@@ -1,4 +1,4 @@
-%IF Plotter
+%IF Plotter - Old version, no explicit cytoplasm masks allowed.
 %Description: Backend for IF_GUI. Plots .csv or .txt data by grouping
 %a table of values by the header 'Ch' into channels.
 %Last Edit: 180822
@@ -34,7 +34,6 @@ for ctr2 = 1:length(file.treatmentfold)
     
     cnt1 = 1;
     cnt2 = 1;
-    cnt3 = 1;
     
     %% 2. Concatenate all data from individual .txt or .csv
     for c1 = 1:length(dir_cell)
@@ -51,8 +50,7 @@ for ctr2 = 1:length(file.treatmentfold)
         
         
         %Read in prefix to determine if 'Nuc' or 'Cyt'
-        prefixIdx      = strfind(dir_cell(c1).name, '_');
-        nuc_cyt_flag   = dir_cell(c1).name(1:prefixIdx(1)-1);
+        nuc_cyt_flag   = dir_cell(c1).name(1:3);
         
         
         %Error Handling:
@@ -61,7 +59,6 @@ for ctr2 = 1:length(file.treatmentfold)
         end
         
         switch nuc_cyt_flag
-            %% 
             case inputs.nucMaskPrefix 
                 %Store Integrated Density (If/Else error handling for empty channels)
                                                         intDenNuc_ch1{cnt1} = temptable.IntDen(temptable.Ch==ch1);
@@ -102,20 +99,17 @@ for ctr2 = 1:length(file.treatmentfold)
                 end
                 
                 %Empty variables if no cytoplasm mask is selected:
-                if ~inputs.cellMaskFlag
-                [   intDenWhole_ch1{cnt1}, intDenWhole_ch2{cnt1}, intDenWhole_ch3{cnt1}, intDenWhole_ch4{cnt1}, ...
-                    areaWhole_ch1{cnt1},   areaWhole_ch2{cnt1},   areaWhole_ch3{cnt1},   areaWhole_ch4{cnt1}, ...
-                    ] = deal(zeros(size(areaNuc_ch1{cnt1})));
-                end
                 if ~inputs.cytMaskFlag
-                [   totIntCyt_1{cnt1},     totIntCyt_2{cnt1},     totIntCyt_3{cnt1},     totIntCyt_4{cnt1}, ...
-                    totAreaCyt_1{cnt1},    totAreaCyt_2{cnt1},    totAreaCyt_3{cnt1},    totAreaCyt_4{cnt1}, ...
+                [   intDenWhole_ch1{cnt1}, intDenWhole_ch2{cnt1}, ...
+                    intDenWhole_ch3{cnt1}, intDenWhole_ch4{cnt1}, ...
+                    areaWhole_ch1{cnt1},   areaWhole_ch2{cnt1}, ...
+                    areaWhole_ch3{cnt1},   areaWhole_ch4{cnt1}, ...
                     ] = deal(zeros(size(areaNuc_ch1{cnt1})));
                 end
                 cnt1 = cnt1+1;
                 
-            %%    
-            case inputs.cellMaskPrefix
+                
+            case inputs.cytMaskPrefix
                 %Store Integrated Density
                                                         intDenWhole_ch1{cnt2} = temptable.IntDen(temptable.Ch==ch1);
                 if(max(ismember(temptable.Ch, ch2)));   intDenWhole_ch2{cnt2} = temptable.IntDen(temptable.Ch==ch2);
@@ -146,80 +140,21 @@ for ctr2 = 1:length(file.treatmentfold)
 
                 %Empty variables if no nuclear mask is selected:
                 if ~inputs.nucMaskFlag
-                [   intDenNuc_ch1{cnt2}, intDenNuc_ch2{cnt2}, intDenNuc_ch3{cnt2}, intDenNuc_ch4{cnt2}, ...
-                    areaNuc_ch1{cnt2},   areaNuc_ch2{cnt2},   areaNuc_ch3{cnt2},   areaNuc_ch4{cnt2}, ...
+                [   intDenNuc_ch1{cnt2}, intDenNuc_ch2{cnt2}, ...
+                    intDenNuc_ch3{cnt2}, intDenNuc_ch4{cnt2}, ...
+                    areaNuc_ch1{cnt2},   areaNuc_ch2{cnt2}, ...
+                    areaNuc_ch3{cnt2},   areaNuc_ch4{cnt2}, ...
                     ] = deal(zeros(size(areaWhole_ch1{cnt2})));
                 end
-                
-                if ~inputs.cytMaskFlag
-                [   totIntCyt_1{cnt2},     totIntCyt_2{cnt2},     totIntCyt_3{cnt2},     totIntCyt_4{cnt2}, ...
-                    totAreaCyt_1{cnt2},    totAreaCyt_2{cnt2},    totAreaCyt_3{cnt2},    totAreaCyt_4{cnt2}, ...
-                    ] = deal(zeros(size(areaNuc_ch1{cnt2})));
-                end
                 cnt2 = cnt2+1;
-                
-            %%    
-            case inputs.cytMaskPrefix
-                %Store Integrated Density
-                                                        totIntCyt_ch1{cnt3} = temptable.IntDen(temptable.Ch==ch1);
-                if(max(ismember(temptable.Ch, ch2)));   totIntCyt_ch2{cnt3} = temptable.IntDen(temptable.Ch==ch2);
-                else;                                   totIntCyt_ch2{cnt3} = zeros(length(nonzeros(temptable.Ch==ch1)),1); end
-                if(max(ismember(temptable.Ch, ch3)));   totIntCyt_ch3{cnt3} = temptable.IntDen(temptable.Ch==ch3);
-                else;                                   totIntCyt_ch3{cnt3} = zeros(length(nonzeros(temptable.Ch==ch1)),1); end
-                if(max(ismember(temptable.Ch, ch4)));   totIntCyt_ch4{cnt3} = temptable.IntDen(temptable.Ch==ch4);
-                else;                                   totIntCyt_ch4{cnt3} = zeros(length(nonzeros(temptable.Ch==ch1)),1); end
-
-                %Store Area
-                                                        totAreaCyt_ch1{cnt3} = temptable.Area(temptable.Ch==ch1);
-                if(max(ismember(temptable.Ch, ch2)));   totAreaCyt_ch2{cnt3} = temptable.Area(temptable.Ch==ch2);
-                else;                                   totAreaCyt_ch2{cnt3} = zeros(length(nonzeros(temptable.Ch==ch1)),1); end
-                if(max(ismember(temptable.Ch, ch3)));   totAreaCyt_ch3{cnt3} = temptable.Area(temptable.Ch==ch3);
-                else;                                   totAreaCyt_ch3{cnt3} = zeros(length(nonzeros(temptable.Ch==ch1)),1); end
-                if(max(ismember(temptable.Ch, ch4)));   totAreaCyt_ch4{cnt3} = temptable.Area(temptable.Ch==ch4);
-                else;                                   totAreaCyt_ch4{cnt3} = zeros(length(nonzeros(temptable.Ch==ch1)),1); end
-
-                if inputs.ROImatching
-                    templist        = temptable.Label(temptable.Ch==ch1);
-                    ROIcytIdx1      = cell2mat(strfind(templist(1), 'tif:'))+4;
-                    ROIcytIdx2      = length(templist{1}) - cell2mat(strfind(templist(1), 'c:'))+2;         %Measure name from end since ROI numbers can have variable length
-                    templist2       = cellfun(@(x) x(ROIcytIdx1:end-ROIcytIdx2), templist, 'UniformOutput', 0);
-                    templist3       = cleanNames(templist2, '-');
-                    ROIcyt{cnt3}    = str2double(cleanNames(templist3, '-'))';
-
-                end
-
-                %Empty variables if no nuclear mask is selected:
-                if ~inputs.nucMaskFlag
-                [   intDenNuc_ch1{cnt3}, intDenNuc_ch2{cnt3}, intDenNuc_ch3{cnt3}, intDenNuc_ch4{cnt3}, ...
-                    areaNuc_ch1{cnt3},   areaNuc_ch2{cnt3},   areaNuc_ch3{cnt3},   areaNuc_ch4{cnt3}, ...
-                    ] = deal(zeros(size(areaWhole_ch1{cnt3})));
-                end
-                if ~inputs.cellMaskFlag
-                [   intDenWhole_ch1{cnt3}, intDenWhole_ch2{cnt3}, intDenWhole_ch3{cnt3}, intDenWhole_ch4{cnt3}, ...
-                    areaWhole_ch1{cnt3},   areaWhole_ch2{cnt3},   areaWhole_ch3{cnt3},   areaWhole_ch4{cnt3}, ...
-                    ] = deal(zeros(size(areaNuc_ch1{cnt3})));
-                end
-                cnt3 = cnt3+1;
         end
         clear templist templist2 templist3 ROIcytIdx ROInucIdx
     end
-    clear cnt1 cnt2 cnt3
+    clear cnt1 cnt2
     
-%LAZY FIX FOR THIS:
-if inputs.cytMaskPrefix
-intDenWhole_ch1 = totIntCyt_ch1;
-intDenWhole_ch2 = totIntCyt_ch2;
-intDenWhole_ch3 = totIntCyt_ch3;
-intDenWhole_ch4 = totIntCyt_ch4;
-
-areaWhole_ch1   = totAreaCyt_ch1;
-areaWhole_ch2   = totAreaCyt_ch2;
-areaWhole_ch3   = totAreaCyt_ch3;
-areaWhole_ch4   = totAreaCyt_ch4;
-end
     
 %Match nuclear and cyt ROIs based on their names, only if both checkboxes in the GUI are ON    
-if (inputs.nucMaskFlag && inputs.cellMaskFlag) || (inputs.nucMaskFlag && inputs.cytMaskFlag )
+if inputs.nucMaskFlag && inputs.cytMaskFlag 
 
     [intDenWhole_ch1,intDenWhole_ch2,intDenWhole_ch3,intDenWhole_ch4,...
        intDenNuc_ch1,  intDenNuc_ch2,  intDenNuc_ch3,  intDenNuc_ch4,...
@@ -255,37 +190,25 @@ end
     
     %delete entries in ch4 where cyt<nuc Add More Channels here, I'm lazy
     %right now so won't do it
-    cleartmp = find(abs((totAreaWhole_2-totAreaNuc_2))<10);
+    cleartmp = find((totAreaWhole_4-totAreaNuc_4)<10);
 
-    totIntWhole_2(cleartmp)  = [];
-    totAreaNuc_2(cleartmp)   = [];
-    totAreaWhole_2(cleartmp) = [];
-    totIntNuc_2(cleartmp)    = [];
+    totIntWhole_4(cleartmp)  = [];
+    totAreaNuc_4(cleartmp)   = [];
+    totAreaWhole_4(cleartmp) = [];
+    totIntNuc_4(cleartmp)    = [];
     
     
     %Estimating Cytoplasm:
-    if inputs.cytMaskFlag
-        totIntCyt_1 = totIntWhole_1;
-        totIntCyt_2 = totIntWhole_2;
-        totIntCyt_3 = totIntWhole_3;
-        totIntCyt_4 = totIntWhole_4;
-        
-        totAreaCyt_1 = totAreaWhole_1;
-        totAreaCyt_2 = totAreaWhole_2;
-        totAreaCyt_3 = totAreaWhole_3;
-        totAreaCyt_4 = totAreaWhole_4;
-        
-    else
-        totIntCyt_1 = totIntWhole_1-totIntNuc_1;
-        totIntCyt_2 = totIntWhole_2-totIntNuc_2;
-        totIntCyt_3 = totIntWhole_3-totIntNuc_3;
-        totIntCyt_4 = totIntWhole_4-totIntNuc_4;
-        
-        totAreaCyt_1 = totAreaWhole_1-totAreaNuc_1;
-        totAreaCyt_2 = totAreaWhole_2-totAreaNuc_2;
-        totAreaCyt_3 = totAreaWhole_3-totAreaNuc_3;
-        totAreaCyt_4 = totAreaWhole_4-totAreaNuc_4;
-    end
+    totIntCyt_1 = totIntWhole_1-totIntNuc_1;
+    totIntCyt_2 = totIntWhole_2-totIntNuc_2;
+    totIntCyt_3 = totIntWhole_3-totIntNuc_3;
+    totIntCyt_4 = totIntWhole_4-totIntNuc_4;
+
+    totAreaCyt_1 = totAreaWhole_1-totAreaNuc_1;
+    totAreaCyt_2 = totAreaWhole_2-totAreaNuc_2;
+    totAreaCyt_3 = totAreaWhole_3-totAreaNuc_3;
+    totAreaCyt_4 = totAreaWhole_4-totAreaNuc_4;
+    
     
    
     %Calculating Means:
@@ -392,8 +315,6 @@ end
         areaNuc_ch1    areaNuc_ch2     areaNuc_ch3     areaNuc_ch4 ...
         intDenWhole_ch1 intDenWhole_ch2 intDenWhole_ch3 intDenWhole_ch4 ...
         areaWhole_ch1  areaWhole_ch2   areaWhole_ch3    areaWhole_ch4 ...
-        totIntCyt_ch1  totIntCyt_ch2   totIntCyt_ch3   totIntCyt_ch4 ...
-        totAreaCyt_ch1 totAreaCyt_ch2  totAreaCyt_ch3  totAreaCyt_ch4 ...
         xChanPositiveRat    yChanPositiveRat    doublePositiveRat   doubleNegativeRat ...
         ROIcyt  ROInuc
 end
@@ -543,7 +464,6 @@ if outputs.boxplot==1
                     lims.boxStd   = cellfun(@(x) std(x(:,1)), resvec);
                     lims.maxLabel = cellfun(@(x) max(x(:,1)), resvec); 
                     lims.boxmean  = cellfun(@(x) mean(x(:,1)), resvec); %mainly for printing
-                    lims.boxmed   = cellfun(@(x) median())
                     lims.boxCV    = lims.boxStd./lims.boxmean;
                     
                     chlabel       = inputs.ChannelLabel{cc};

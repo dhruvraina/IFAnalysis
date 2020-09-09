@@ -4,12 +4,12 @@ addpath('/Users/draina/Documents/Code/MATLAB/DhruvTools/');
 
 
 %User Inputs
-inputTxtFile         = '/Users/draina/Data/E11_CommuniFate/2020_ CS_FACS_Diff_Time_Course/AllExperiments.txt';
+inputTxtFile         = '/Users/draina/Desktop/E11_Communifate/densityVolume/C6_Fate_density_190515_Azra.txt';
 Consolidated         = readtable(inputTxtFile, 'Delimiter', 'tab','Format', '%s%f%f%f%f%f%s' );
-file.outpath         = '/Users/draina/Desktop/';
+file.outpath         = '/Users/draina/Desktop/E11_Communifate/densityVolume';
 file.slashtype       = '/';
-file.experimentName  = '3 replicates';
-plotflag.imageFormat = 'svg';
+file.experimentName  = '200207';
+plotflag.imageFormat = 'png';
 printNumbers         = 0;     %Print values inside graph
 minStringLenMatch    = 5;     %Match first x characters from the Treatment Name
 barTall              = 10;    %Height of plot

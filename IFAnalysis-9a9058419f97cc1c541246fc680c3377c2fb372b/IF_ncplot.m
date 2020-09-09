@@ -3,7 +3,10 @@
 %Dependencies: brewermap, notBoxPlot, UnivarScatter, cleanNames
 %Author: draina
 %Last Edit: 180822
-
+%Menu:
+%SingleScatter
+%ConScatter
+%boxplot ~245
 function IF_ncplot(plotflag, resvec, scatx, scaty, scatz, pathlist_labels, ChannelLabel, calclbl, file, lims, calcs)
 %Using Brewermap
 colors = brewermap(length(file.treatmentLabels), 'Spectral');  %'Set2'
@@ -235,7 +238,7 @@ switch plotflag.type
         
         
         
-        % --------------  C. Boxplot - notBoxPlot  --------:
+        % --------------  C.1 Boxplot - box plot with datapoints  --------:
         
     case ('boxplot')
         %Uses standard boxplot and plotSpread.m for datapoints
@@ -257,10 +260,12 @@ switch plotflag.type
         set(gca, 'XTickLabel', pathlist_labels)
         title(['Mean ' char(ChannelLabel) ' ' calclbl ' Intensity Per Cell'])
         ylabel('Mean Intensity')
-        
         ylim([lims.boxmin lims.boxmax])
+        
+        figWide = length(pathlist_labels)*2.3;
+        figTall = 7;
         fig2.PaperUnits    = 'inches';
-        fig2.PaperPosition = [0 0 8 4];
+        fig2.PaperPosition = [0 0 figWide figTall];
         
         set(gca, 'TickDir', 'out');
         set(gca,'FontSize', 14)
@@ -276,7 +281,9 @@ switch plotflag.type
         end
         close gcf
     
-    case ('notboxplot')
+     % --------------  C.2 Boxplot - notBoxPlot  --------:
+     
+     case ('notboxplot')
         %Unpack resvec
         for ctr1 = 1:length(resvec)
             resvec{1,ctr1}(:,2) = ctr1;
@@ -555,11 +562,11 @@ end
 
 if plotflag.writeStats
          fileID = fopen([file.outpath file.slashtype file.experimentName '_Reformat.txt'],'w');
-         fprintf(fileID, '%1$s\t %2$s\t %3$s\t %4$s\t %5$s\t %6$s\t %7$s\t %8$s\r\n', 'Treatment', 'Mean', 'St.Dev','CV', 'Channel', 'Measurement','Number of Cells', 'Experiment');
+         fprintf(fileID, '%1$s\t %2$s\t %3$s\t %4$s\t %5$s\t %6$s\t %7$s\t %8$s\t %9$s\r\n', 'Treatment', 'Median', 'Mean', 'St.Dev','CV', 'Channel', 'Measurement','Number of Cells', 'Experiment');
          
          for tnum = 1:size(pathlist_labels,2)
              fprintf(fileID,'%1$s\t', pathlist_labels{tnum});
-             fprintf(fileID,'%4.2f\t %4.2f\t %4.2f\t %4.2f\t', lims.boxmean(tnum), lims.boxStd(tnum), lims.boxCV(tnum), lims.boxmed(tnum));
+             fprintf(fileID,'%4.2f\t %4.2f\t %4.2f\t %4.2f\t', lims.boxmed(tnum), lims.boxmean(tnum), lims.boxStd(tnum), lims.boxCV(tnum));
              fprintf(fileID, '%1$s\t', ChannelLabel);
              fprintf(fileID, '%1$s\t', calclbl);
              fprintf(fileID, '%1$s\t', num2str(length(resvec{tnum})));
