@@ -206,6 +206,7 @@ switch plotflag.type
         
         xlim(lims.x)
         ylim(lims.y)
+        set(gca, 'XScale', 'log', 'YScale', 'log')
         xlabel([ChannelLabel{1,1} ' intensity (a.u.)'])
         ylabel([ChannelLabel{1,2} ' intensity (a.u.)'])
         title('Consolidated Scatter')

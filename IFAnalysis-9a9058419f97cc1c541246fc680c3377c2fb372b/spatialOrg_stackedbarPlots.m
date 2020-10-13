@@ -3,11 +3,12 @@
 
 %% Init
 addpath(genpath('/Users/draina/Documents/Code/MATLAB/ExchangeTools/'));
+addpath(genpath('/Users/draina/Documents/Code/MATLAB/DhruvTools/'));
 
-testChanA   = resvec_calc4; %List the two channels that need testing
-testChanB   = resvec_calc2; %List the two channels that need testing
-labChanA    = [inputs.ch4lab 'intensity (log a.u.)'];
-labChanB    = [inputs.ch2lab 'intensity (log a.u.)'];
+testChanA   = resvec_calc4; %resvec_calc3; %List the two channels that need testing %4
+testChanB   = resvec_calc2; %resvec_calc2; %List the two channels that need testing %2
+labChanA    = [inputs.ch4lab 'intensity (log a.u.)'];%[inputs.ch3lab 'intensity (log a.u.)']; %[inputs.ch4lab 'intensity (log a.u.)'];
+labChanB    = [inputs.ch2lab 'intensity (log a.u.)'];%[inputs.ch2lab 'intensity (log a.u.)']; %[inputs.ch2lab 'intensity (log a.u.)'];
 nTreatments = size(resvec_another, 2);
 fitComp     = 2;
 lims.x      = [5 12];
@@ -26,6 +27,8 @@ colGrad     = colorGradient(colmap(1,:), colmap(3,:), 101); %Gradient from G+ to
 
 %% Assign state variables:
 %Currently doing a simple gmm fit. Ask Angel how he factored in DP and DNs
+statefind = 1;
+if statefind
 for tt = outputs.limconscatID
     %Init loop vars:
     testVecA = [];
@@ -109,6 +112,8 @@ for tt = outputs.limconscatID
     %Layout adjustments
     p.de.margin  = 15;
     p2.de.margin = 25;
+    p.export([file.outpath file.slashtype 'GMMfit' file.treatmentLabels{tt} '.png'], '-pA5', '-fh', '-rp'); %-ftt 2/3 -fa full area -fh half area
+
     
     %Set state variables
     stateVar                     = zeros(size(post,1),1);   %Unclassified
@@ -120,13 +125,19 @@ for tt = outputs.limconscatID
     predict{tt}(:,2)  = resvec_another{6,tt}(:,2); %Y Values
     predict{tt}(:,3)  = resvec_another{6,tt}(:,3); %Image Field number
     predict{tt}(:,4)  = stateVar;                  %State variable
+    
+
 end
 
+%Save to matfile:
+save([file.outpath file.slashtype char(cleanNames({file.experimentName}, '_')) 'results.mat'], ...
+    'predict', '-append');
+end
 %% Distance plot
 %Note iterate over fields is the corrent place to find
 
 %Inputs:
-radiusCutoff = 4; %Local radius um or px based on image calib
+radiusCutoff = 30; %Local radius um or px based on image calib
 tempFieldNanog = [];
 
 %Iterate over treatments
@@ -194,8 +205,17 @@ for tt2 = nonzeros(outputs.limconscatID)'
 end
 disp('2')
 %% Generate synthetic data
+
+syngen = 1
+if syngen 
+    
+%Initialize variables:
+synthNanogNhood  = {};
+synthResSelfNanog= {};
+synthResSelfGata = {};
+
 replacementType = 'Replacement';
-for rep = 1:100 %Number of iterations
+for rep = 1:10 %Number of iterations
     for tt = outputs.limconscatID
         
         %Synthetic data is same size as number of cells in treatment tt
@@ -279,6 +299,8 @@ end
 synthResSelfNanog = cellfun(@(x) mean(x,2),synthResSelfNanog, 'UniformOutput', 0);
 synthResSelfGata  = cellfun(@(x) mean(x,2), synthResSelfGata, 'UniformOutput', 0);
 
+
+end
 disp('3')
 %% Neighborhood plots - Make figures
 figure
@@ -302,15 +324,6 @@ for nRow = 1:3
                 baseVal = 1-fieldGlobalNanog{nTr}; %Stacked bars plot G+ first, so baseval is in terms of G+
                 hold on
     
-                %Sequential plotting for multicolor bars
-%                 for ss = 1:nItems
-%                     colIdx = floor((selfNanogRes{nCol}(ss)*100)+1);     %101 idx for colGrad avoids indexing error here
-%                     barh(ss, selfNanogRes{nCol}(ss), ...
-%                         'BaseValue', fieldGlobalNanog{nTr}, ...
-%                         'BarWidth', 1, 'FaceColor', colGrad(colIdx,:),...
-%                         'EdgeColor', 'none')
-%                 end
-
                 %Stacked bar:
                 barvecN = zeros(nItems, 2);
                 barvecN = horzcat(1-selfNanogRes{nCol}, selfNanogRes{nCol});
@@ -323,15 +336,17 @@ for nRow = 1:3
                 %Plot basevalue:
                 plot(get(gca, 'xlim'), [baseVal baseVal], '--k')
                     
-                %Plot synthetic data    
+                %Plot synthetic data 
+                if syngen
                 plot(length(synthResSelfNanog{nTr}):-1:1, 1-synthResSelfNanog{nTr}, 'Color', [0 0 132]./255, 'LineWidth', 2)
+                end
+
                 set(gca, 'YTick', [0;0.5;1])
                 ylim([0 1])
                 xlabel('Nanog+ cell index')
                 title('Mean neighborhood: N+ cell')
                 set(gca, 'FontSize', 12, 'TickDir', 'out')
                 if nCol==1; ylabel('Proportion'); end
-                
             end
             
             
@@ -346,18 +361,7 @@ for nRow = 1:3
                 nItems  = length(selfGataRes{nCol});
                 nTr     = outputs.limconscatID(nCol);
                 baseVal = 1-fieldGlobalNanog{nTr}; %Stacked bars plot G+ first, so baseval is in terms of G+
-
                 hold on
-                
-%                 %Sequential plotting for multicolor bars
-%                 for ss = 1:nItems
-%                     colIdx = floor((selfGataRes{nCol}(ss)*100)+1);     %101 idx for colGrad avoids indexing error here
-%                     barh(ss, selfGataRes{nCol}(ss), ...
-%                         'BaseValue', fieldGlobalNanog{nTr},...
-%                         'BarWidth', 1, 'FaceColor', colGrad(colIdx,:), ...
-%                         'EdgeColor', 'none')
-%                 end
-                
                 
                 %Stacked Bar:
                 barvecG = horzcat(1-selfGataRes{nCol}, selfGataRes{nCol});
@@ -370,8 +374,10 @@ for nRow = 1:3
                 %Plot basevalue:
                 plot(get(gca, 'xlim'), [baseVal baseVal], '--k')
                     
-                %Plot synthetic data    
+                %Plot synthetic data 
+                if syngen
                 plot(length(synthResSelfGata{nTr}):-1:1, 1-synthResSelfGata{nTr}, 'Color', [0 0 132]./255, 'LineWidth', 2)
+                end
                 set(gca, 'YTick', [0;0.5;1])
                 ylim([0 1])
                 xlabel('Gata+ cell index')

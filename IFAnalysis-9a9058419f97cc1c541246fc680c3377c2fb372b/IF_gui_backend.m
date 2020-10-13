@@ -721,6 +721,7 @@ if outputs.conscat==1
     IF_ncplot(plotflag, resvec,scatx, scaty, scatz, file.treatmentLabels, chlabel, calclbl, file, lims, calcs)
         
 end
+
 save([file.outpath file.slashtype char(cleanNames({file.experimentName}, '_')) 'results.mat'], ...
     'resvec_calc1', 'resvec_calc2', 'resvec_calc3', 'resvec_calc4', 'resvec_another',...
     'file', 'inputs', 'calcs', 'outputs');
